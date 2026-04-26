@@ -1,0 +1,238 @@
+<!-- /*
+* Template Name: Property
+* Template Author: Untree.co
+* Template URI: https://untree.co/
+* License: https://creativecommons.org/licenses/by/3.0/
+*/ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Untree.co" />
+    <link rel="shortcut icon" href="favicon.png" />
+
+    <meta name="description" content="" />
+    <meta name="keywords" content="bootstrap, bootstrap5" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="/css/tiny-slider.css" />
+    <link rel="stylesheet" href="/css/aos.css" />
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+
+    <title>Property Agents - Property</title>
+  </head>
+  <body>
+    <div class="site-mobile-menu site-navbar-target">
+      <div class="site-mobile-menu-header">
+        <div class="site-mobile-menu-close">
+          <span class="icofont-close js-menu-toggle"></span>
+        </div>
+      </div>
+      <div class="site-mobile-menu-body"></div>
+    </div>
+
+    <nav class="site-nav">
+      <div class="container">
+        <div class="menu-bg-wrap">
+          <div class="site-navigation">
+            <a href="{{ url_for('index') }}" class="logo m-0 float-start">Property</a>
+
+            <ul
+              class="js-clone-nav d-none d-lg-inline-block text-start site-menu float-end"
+            >
+              <li><a href="{{ url_for('index') }}">Home</a></li>
+              <li><a href="{{ url_for('property_list') }}">Properties</a></li>
+              <li><a href="{{ url_for('about') }}">About</a></li>
+              <li class="active"><a href="{{ url_for('property_agents') }}">Agents</a></li>
+              <li><a href="{{ url_for('login') }}">Login</a></li>
+            </ul>
+
+            <a
+              href="#"
+              class="burger light me-auto float-end mt-1 site-menu-toggle js-menu-toggle d-inline-block d-lg-none"
+              data-toggle="collapse"
+              data-target="#main-navbar"
+            >
+              <span></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div
+      class="hero page-inner overlay"
+      style="background-image: url('images/hero_bg_1.jpg')"
+    >
+      <div class="container">
+        <div class="row justify-content-center align-items-center">
+          <div class="col-lg-9 text-center mt-5">
+            <h1 class="heading" data-aos="fade-up">Property Agents</h1>
+            <nav
+              aria-label="breadcrumb"
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
+              <ol class="breadcrumb text-center justify-content-center">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">Agents</li>
+              </ol>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="container">
+        <div class="row mb-5">
+          <div class="col-lg-6">
+            <h2 class="font-weight-bold text-heading mb-3">Meet Our Expert Agents</h2>
+            <p class="text-muted">Professional and experienced agents ready to help you</p>
+          </div>
+        </div>
+        <div class="row">
+          {% for agent in agents %}
+          <div class="col-md-6 col-lg-4 mb-4" data-aos="fade-up">
+            <div class="team-member">
+              <div class="position-relative">
+                {% if agent.profile_image %}
+                <img src="static/uploads/{{ agent.profile_image }}" alt="{{ agent.user.first_name }} {{ agent.user.last_name }}" class="img-fluid rounded">
+                {% else %}
+                <img src="images/person_1.jpg" alt="{{ agent.user.first_name }} {{ agent.user.last_name }}" class="img-fluid rounded">
+                {% endif %}
+                <div class="social-links">
+                  {% if agent.facebook_url %}
+                  <a href="{{ agent.facebook_url }}"><span class="icon-facebook"></span></a>
+                  {% endif %}
+                  {% if agent.twitter_url %}
+                  <a href="{{ agent.twitter_url }}"><span class="icon-twitter"></span></a>
+                  {% endif %}
+                  {% if agent.linkedin_url %}
+                  <a href="{{ agent.linkedin_url }}"><span class="icon-linkedin"></span></a>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="team-info">
+                <h3>{{ agent.user.first_name }} {{ agent.user.last_name }}</h3>
+                {% if agent.designation %}
+                <span class="position">{{ agent.designation }}</span>
+                {% endif %}
+                {% if agent.experience_years %}
+                <p class="experience">{{ agent.experience_years }} years of experience</p>
+                {% endif %}
+                {% if agent.bio %}
+                <p class="bio">{{ agent.bio[:100] }}{% if agent.bio|length > 100 %}...{% endif %}</p>
+                {% endif %}
+                <div class="contact-info">
+                  <p><strong>Email:</strong> {{ agent.user.email }}</p>
+                  {% if agent.user.phone %}
+                  <p><strong>Phone:</strong> {{ agent.user.phone }}</p>
+                  {% endif %}
+                  {% if agent.license_number %}
+                  <p><strong>License:</strong> {{ agent.license_number }}</p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+          {% else %}
+          <div class="col-12 text-center">
+            <p>No featured agents available at the moment.</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="section bg-light">
+      <div class="container">
+        <div class="row">
+          <div class="col-12">
+            <div class="text-center mb-5" data-aos="fade-up">
+              <h2 class="font-weight-bold text-heading">Why Work With Our Agents?</h2>
+              <p class="text-muted">Expertise you can trust</p>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+            <div class="service">
+              <span class="icon icon-trophy text-primary"></span>
+              <h3>Proven Track Record</h3>
+              <p>Our agents have a history of successful transactions</p>
+            </div>
+          </div>
+          <div class="col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="200">
+            <div class="service">
+              <span class="icon icon-compass text-primary"></span>
+              <h3>Local Market Knowledge</h3>
+              <p>Deep understanding of local property markets</p>
+            </div>
+          </div>
+          <div class="col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="300">
+            <div class="service">
+              <span class="icon icon-heart text-primary"></span>
+              <h3>Personalized Service</h3>
+              <p>Tailored approach to meet your specific needs</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-4">
+            <div class="widget">
+              <h3>About Property</h3>
+              <p>Your trusted partner in finding the perfect property</p>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="widget">
+              <h3>Quick Links</h3>
+              <ul class="list-unstyled">
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('property_list') }}">Properties</a></li>
+                <li><a href="{{ url_for('about') }}">About</a></li>
+                <li><a href="{{ url_for('property_agents') }}">Agents</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="widget">
+              <h3>Contact</h3>
+              <p>Email: info@property.com</p>
+              <p>Phone: +1 234 567 8900</p>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-5">
+          <div class="col-12 text-center">
+            <p>&copy; <script>document.write(new Date().getFullYear());</script> Property. All Rights Reserved.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/aos.js"></script>
+    <script>
+      AOS.init({
+        duration: 800,
+        easing: 'slide',
+        once: true
+      });
+    </script>
+  </body>
+</html>

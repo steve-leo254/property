@@ -1,0 +1,430 @@
+<!-- /*
+* Template Name: Property
+* Template Author: Untree.co
+* Template URI: https://untree.co/
+* License: https://creativecommons.org/licenses/by/3.0/
+*/ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Untree.co" />
+    <link rel="shortcut icon" href="favicon.png" />
+
+    <meta name="description" content="" />
+    <meta name="keywords" content="bootstrap, bootstrap5" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="/fonts/icomoon/style.css" />
+    <link rel="stylesheet" href="/fonts/flaticon/font/flaticon.css" />
+
+    <link rel="stylesheet" href="/css/tiny-slider.css" />
+    <link rel="stylesheet" href="/css/aos.css" />
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+
+    <title>Properties - Find Your Dream Home</title>
+  </head>
+  <body>
+    <div class="site-mobile-menu site-navbar-target">
+      <div class="site-mobile-menu-header">
+        <div class="site-mobile-menu-close">
+          <span class="icofont-close js-menu-toggle"></span>
+        </div>
+      </div>
+      <div class="site-mobile-menu-body"></div>
+    </div>
+
+    <nav class="site-nav">
+      <div class="container">
+        <div class="menu-bg-wrap">
+          <div class="site-navigation">
+            <a href="{{ url_for('index') }}" class="logo m-0 float-start">Property</a>
+
+            <ul
+              class="js-clone-nav d-none d-lg-inline-block text-start site-menu float-end"
+            >
+              <li><a href="{{ url_for('index') }}">Home</a></li>
+              <li class="has-children active">
+                <a href="{{ url_for('property_list') }}">Properties</a>
+                <ul class="dropdown">
+                  <li><a href="{{ url_for('property_list') }}?listing_type=FOR_SALE">Buy Property</a></li>
+                  <li><a href="{{ url_for('property_list') }}?listing_type=FOR_RENT">Rent Property</a></li>
+                </ul>
+              </li>
+              <li><a href="{{ url_for('about') }}">About</a></li>
+              <li><a href="{{ url_for('property_agents') }}">Agents</a></li>
+              <li><a href="{{ url_for('login') }}">Login</a></li>
+              <li><a href="{{ url_for('register') }}">Register</a></li>
+            </ul>
+
+            <a
+              href="#"
+              class="burger light me-auto float-end mt-1 site-menu-toggle js-menu-toggle d-inline-block d-lg-none"
+              data-toggle="collapse"
+              data-target="#main-navbar"
+            >
+              <span></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div
+      class="hero page-inner overlay"
+      style="background-image: url('images/hero_bg_1.jpg')"
+    >
+      <div class="container">
+        <div class="row justify-content-center align-items-center">
+          <div class="col-lg-9 text-center mt-5">
+            <h1 class="heading" data-aos="fade-up">Properties</h1>
+
+            <nav
+              aria-label="breadcrumb"
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
+              <ol class="breadcrumb text-center justify-content-center">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li
+                  class="breadcrumb-item active text-white-50"
+                  aria-current="page"
+                >
+                  Properties
+                </li>
+              </ol>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section section-properties">
+      <div class="container">
+        <div class="row mb-5">
+          <div class="col-lg-6">
+            <h2 class="font-weight-bold text-heading mb-3">All Properties</h2>
+            <p class="text-muted">Browse our complete collection of properties</p>
+          </div>
+          <div class="col-lg-6 text-end">
+            <a href="{{ url_for('add_property') }}" class="btn btn-primary">Add Property</a>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <form method="GET" action="{{ url_for('property_list') }}" class="row g-3">
+              <div class="col-md-3">
+                <select name="listing_type" class="form-select">
+                  <option value="">All Types</option>
+                  <option value="FOR_SALE" {% if request.args.get('listing_type') == 'FOR_SALE' %}selected{% endif %}>For Sale</option>
+                  <option value="FOR_RENT" {% if request.args.get('listing_type') == 'FOR_RENT' %}selected{% endif %}>For Rent</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <select name="property_type_id" class="form-select">
+                  <option value="">All Property Types</option>
+                  {% for type in property_types %}
+                  <option value="{{ type.id }}" {% if request.args.get('property_type_id')|int == type.id %}selected{% endif %}>{{ type.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-3">
+                <select name="location_id" class="form-select">
+                  <option value="">All Locations</option>
+                  {% for location in locations %}
+                  <option value="{{ location.id }}" {% if request.args.get('location_id')|int == location.id %}selected{% endif %}>{{ location.city }}, {{ location.state }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-3">
+                <button type="submit" class="btn btn-outline-primary w-100">Filter</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="row">
+          {% for property in properties.items %}
+          <div class="col-md-6 col-lg-4 mb-4" data-aos="fade-up">
+            <div class="property-item">
+              <a href="{{ url_for('property_detail', property_id=property.id) }}" class="img">
+                {% if property.main_image %}
+                <img src="static/uploads/{{ property.main_image }}" alt="Image" class="img-fluid" />
+                {% else %}
+                <img src="images/img_1.jpg" alt="Image" class="img-fluid" />
+                {% endif %}
+              </a>
+              <div class="property-content">
+                <div class="price mb-2"><span>${{ "%.2f"|format(property.price) }}</span></div>
+                <div>
+                  <span class="d-block mb-2 text-black-50">{{ property.listing_type.value.replace('_', ' ').title() }}</span>
+                  <h3><a href="{{ url_for('property_detail', property_id=property.id) }}">{{ property.title }}</a></h3>
+                  <p>{{ property.address }}</p>
+                </div>
+                <div class="specs d-flex mb-3">
+                  <span class="d-block d-flex align-items-center me-3">
+                    <span class="icon-bed me-2"></span>
+                    <span class="caption">{{ property.bedrooms }} beds</span>
+                  </span>
+                  <span class="d-block d-flex align-items-center">
+                    <span class="icon-bath me-2"></span>
+                    <span class="caption">{{ property.bathrooms }} baths</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% else %}
+          <div class="col-12 text-center">
+            <p>No properties found matching your criteria.</p>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if properties.pages > 1 %}
+        <div class="row mt-5">
+          <div class="col-12">
+            <nav aria-label="Page navigation">
+              <ul class="pagination justify-content-center">
+                {% if properties.has_prev %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('property_list', page=properties.prev_num, **request.args) }}">Previous</a>
+                </li>
+                {% endif %}
+                
+                {% for page_num in properties.iter_pages() %}
+                  {% if page_num %}
+                    {% if page_num != properties.page %}
+                    <li class="page-item">
+                      <a class="page-link" href="{{ url_for('property_list', page=page_num, **request.args) }}">{{ page_num }}</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item active">
+                      <span class="page-link">{{ page_num }}</span>
+                    </li>
+                    {% endif %}
+                  {% else %}
+                    <li class="page-item disabled">
+                      <span class="page-link">...</span>
+                    </li>
+                  {% endif %}
+                {% endfor %}
+                
+                {% if properties.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('property_list', page=properties.next_num, **request.args) }}">Next</a>
+                </li>
+                {% endif %}
+              </ul>
+            </nav>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+                    <span class="d-block d-flex align-items-center me-3">
+                      <span class="icon-bed me-2"></span>
+                      <span class="caption">2 beds</span>
+                    </span>
+                    <span class="d-block d-flex align-items-center">
+                      <span class="icon-bath me-2"></span>
+                      <span class="caption">2 baths</span>
+                    </span>
+                  </div>
+
+                  <a
+                    href="property-single.html"
+                    class="btn btn-primary py-2 px-3"
+                    >See details</a
+                  >
+                </div>
+              </div>
+            </div>
+            <!-- .item -->
+          </div>
+
+          <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4">
+            <div class="property-item mb-30">
+              <a href="property-single.html" class="img">
+                <img src="images/img_7.jpg" alt="Image" class="img-fluid" />
+              </a>
+
+              <div class="property-content">
+                <div class="price mb-2"><span>$1,291,000</span></div>
+                <div>
+                  <span class="d-block mb-2 text-black-50"
+                    >5232 California Fake, Ave. 21BC</span
+                  >
+                  <span class="city d-block mb-3">California, USA</span>
+
+                  <div class="specs d-flex mb-4">
+                    <span class="d-block d-flex align-items-center me-3">
+                      <span class="icon-bed me-2"></span>
+                      <span class="caption">2 beds</span>
+                    </span>
+                    <span class="d-block d-flex align-items-center">
+                      <span class="icon-bath me-2"></span>
+                      <span class="caption">2 baths</span>
+                    </span>
+                  </div>
+
+                  <a
+                    href="property-single.html"
+                    class="btn btn-primary py-2 px-3"
+                    >See details</a
+                  >
+                </div>
+              </div>
+            </div>
+            <!-- .item -->
+          </div>
+          <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4">
+            <div class="property-item mb-30">
+              <a href="property-single.html" class="img">
+                <img src="images/img_8.jpg" alt="Image" class="img-fluid" />
+              </a>
+
+              <div class="property-content">
+                <div class="price mb-2"><span>$1,291,000</span></div>
+                <div>
+                  <span class="d-block mb-2 text-black-50"
+                    >5232 California Fake, Ave. 21BC</span
+                  >
+                  <span class="city d-block mb-3">California, USA</span>
+
+                  <div class="specs d-flex mb-4">
+                    <span class="d-block d-flex align-items-center me-3">
+                      <span class="icon-bed me-2"></span>
+                      <span class="caption">2 beds</span>
+                    </span>
+                    <span class="d-block d-flex align-items-center">
+                      <span class="icon-bath me-2"></span>
+                      <span class="caption">2 baths</span>
+                    </span>
+                  </div>
+
+                  <a
+                    href="property-single.html"
+                    class="btn btn-primary py-2 px-3"
+                    >See details</a
+                  >
+                </div>
+              </div>
+            </div>
+            <!-- .item -->
+          </div>
+          <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4">
+            <div class="property-item mb-30">
+              <a href="property-single.html" class="img">
+                <img src="images/img_1.jpg" alt="Image" class="img-fluid" />
+              </a>
+
+              <div class="property-content">
+                <div class="price mb-2"><span>$1,291,000</span></div>
+                <div>
+                  <span class="d-block mb-2 text-black-50"
+                    >5232 California Fake, Ave. 21BC</span
+                  >
+                  <span class="city d-block mb-3">California, USA</span>
+
+                  <div class="specs d-flex mb-4">
+                    <span class="d-block d-flex align-items-center me-3">
+                      <span class="icon-bed me-2"></span>
+                      <span class="caption">2 beds</span>
+                    </span>
+                    <span class="d-block d-flex align-items-center">
+                      <span class="icon-bath me-2"></span>
+                      <span class="caption">2 baths</span>
+                    </span>
+                  </div>
+
+                  <a
+                    href="property-single.html"
+                    class="btn btn-primary py-2 px-3"
+                    >See details</a
+                  >
+                </div>
+              </div>
+            </div>
+            <!-- .item -->
+          </div>
+        </div>
+        <div class="row align-items-center py-5">
+          <div class="col-lg-3">Pagination (1 of 10)</div>
+          <div class="col-lg-6 text-center">
+            <div class="custom-pagination">
+              <a href="#">1</a>
+              <a href="#" class="active">2</a>
+              <a href="#">3</a>
+              <a href="#">4</a>
+              <a href="#">5</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-4">
+            <div class="widget">
+              <h3>About Property</h3>
+              <p>Your trusted partner in finding the perfect property</p>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="widget">
+              <h3>Quick Links</h3>
+              <ul class="list-unstyled">
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('property_list') }}">Properties</a></li>
+                <li><a href="{{ url_for('about') }}">About</a></li>
+                <li><a href="{{ url_for('property_agents') }}">Agents</a></li>
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="widget">
+              <h3>Contact</h3>
+              <p>Email: info@property.com</p>
+              <p>Phone: +1 234 567 8900</p>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-5">
+          <div class="col-12 text-center">
+            <p>&copy; <script>document.write(new Date().getFullYear());</script> Property. All Rights Reserved.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /.site-footer -->
+
+    <div id="loader" class="show fullscreen">
+      <svg class="circular" width="48px" height="48px">
+        <circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/>
+        <circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#2161a1"/>
+      </svg>
+    </div>
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/tiny-slider.js"></script>
+    <script src="/js/aos.js"></script>
+    <script src="/js/navbar.js"></script>
+    <script src="/js/counter.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
