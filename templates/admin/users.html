@@ -1,0 +1,296 @@
+<!-- /*
+* Template Name: Property
+* Template Author: flowtech
+* Template URI: https://flowtech/
+* License: https://creativecommons.org/licenses/by/3.0/
+*/ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="flowtech" />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    <meta name="description" content="" />
+    <meta name="keywords" content="bootstrap, bootstrap5" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+
+    <title>
+      Manage Users - Property
+    </title>
+  </head>
+  <body>
+    <div class="site-mobile-menu site-navbar-target">
+      <div class="site-mobile-menu-header">
+        <div class="site-mobile-menu-close">
+          <span class="icofont-close js-menu-toggle"></span>
+        </div>
+      </div>
+      <div class="site-mobile-menu-body"></div>
+    </div>
+
+    <nav class="site-nav">
+      <div class="container">
+        <div class="menu-bg-wrap">
+          <div class="site-navigation">
+            <a href="{{ url_for('index') }}" class="logo m-0 float-start">Property</a>
+
+            <ul
+              class="js-clone-nav d-none d-lg-inline-block text-start site-menu float-end"
+            >
+              <li><a href="{{ url_for('index') }}">Home</a></li>
+              <li><a href="{{ url_for('property_list') }}">Properties</a></li>
+              <li><a href="{{ url_for('about') }}">About</a></li>
+              <li><a href="{{ url_for('property_agents') }}">Agents</a></li>
+              {% if current_user.is_authenticated %}
+              <li class="has-children">
+                <a href="#">{{ current_user.username }}</a>
+                <ul class="dropdown">
+                  {% if current_user.role == 'ADMIN' %}
+                    <li><a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a></li>
+                    <li><a href="{{ url_for('admin_users') }}">Manage Users</a></li>
+                    <li><a href="{{ url_for('admin_agents') }}">Manage Agents</a></li>
+                    <li><a href="{{ url_for('admin_properties') }}">Manage Properties</a></li>
+                    <li><a href="{{ url_for('admin_inquiries') }}">Manage Inquiries</a></li>
+                  {% else %}
+                    <li><a href="{{ url_for('user_dashboard') }}">My Dashboard</a></li>
+                    <li><a href="{{ url_for('user_profile') }}">My Profile</a></li>
+                    <li><a href="{{ url_for('user_properties') }}">My Properties</a></li>
+                  {% endif %}
+                  <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                </ul>
+              </li>
+            {% else %}
+              <li><a href="{{ url_for('login') }}">Login</a></li>
+              <li><a href="{{ url_for('register') }}">Register</a></li>
+            {% endif %}
+            </ul>
+
+            <a
+              href="#"
+              class="burger light me-auto float-end mt-1 site-menu-toggle js-menu-toggle d-inline-block d-lg-none"
+              data-toggle="collapse"
+              data-target="#main-navbar"
+            >
+              <span></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div
+      class="hero page-inner overlay"
+      style="background-image: url('/images/hero_bg_1.jpg')"
+    >
+      <div class="container">
+        <div class="row justify-content-center align-items-center">
+          <div class="col-lg-9 text-center mt-5">
+            <h1 class="heading" data-aos="fade-up">Manage Users</h1>
+            <nav
+              aria-label="breadcrumb"
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
+              <ol class="breadcrumb text-center justify-content-center">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a></li>
+                <li
+                  class="breadcrumb-item active text-white-50"
+                  aria-current="page"
+                >
+                  Manage Users
+                </li>
+              </ol>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+            <div class="bg-white p-4 rounded shadow" data-aos="fade-up">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3>System Users</h3>
+                <span class="badge bg-primary">{{ users.total }} Total Users</span>
+              </div>
+
+              {% if users.items %}
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Name</th>
+                        <th>Role</th>
+                        <th>Phone</th>
+                        <th>Registered</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for user in users.items %}
+                        <tr>
+                          <td>{{ user.id }}</td>
+                          <td>{{ user.username }}</td>
+                          <td>{{ user.email }}</td>
+                          <td>{{ user.first_name }} {{ user.last_name }}</td>
+                          <td>
+                            <span class="badge bg-{% if user.role.value == 'ADMIN' %}danger{% elif user.role.value == 'AGENT' %}warning{% else %}info{% endif %}">
+                              {{ user.role.value.replace('_', ' ').title() }}
+                            </span>
+                          </td>
+                          <td>{{ user.phone or '-' }}</td>
+                          <td>{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else '-' }}</td>
+                          <td>
+                            <div class="btn-group btn-group-sm">
+                              {% if user.id != current_user.id %}
+                                {% if user.role.value != 'ADMIN' %}
+                                  <a href="#" class="btn btn-sm btn-outline-primary">Edit</a>
+                                  <a href="#" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this user?')">Delete</a>
+                                {% else %}
+                                  <span class="text-muted">Admin</span>
+                                {% endif %}
+                              {% else %}
+                                <span class="text-muted">You</span>
+                              {% endif %}
+                            </div>
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if users.pages > 1 %}
+                  <nav aria-label="User pagination" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                      {% if users.has_prev %}
+                        <li class="page-item">
+                          <a class="page-link" href="{{ url_for('admin_users', page=users.prev_num) }}">Previous</a>
+                        </li>
+                      {% endif %}
+                      
+                      {% for page_num in users.iter_pages() %}
+                        {% if page_num %}
+                          {% if page_num != users.page %}
+                            <li class="page-item">
+                              <a class="page-link" href="{{ url_for('admin_users', page=page_num) }}">{{ page_num }}</a>
+                            </li>
+                          {% else %}
+                            <li class="page-item active">
+                              <span class="page-link">{{ page_num }}</span>
+                            </li>
+                          {% endif %}
+                        {% else %}
+                          <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                          </li>
+                        {% endif %}
+                      {% endfor %}
+                      
+                      {% if users.has_next %}
+                        <li class="page-item">
+                          <a class="page-link" href="{{ url_for('admin_users', page=users.next_num) }}">Next</a>
+                        </li>
+                      {% endif %}
+                    </ul>
+                  </nav>
+                {% endif %}
+              {% else %}
+                <div class="text-center py-5">
+                  <p class="text-muted">No users found in the system.</p>
+                  <a href="{{ url_for('admin_register') }}" class="btn btn-primary">Add First User</a>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-4">
+            <div class="widget">
+              <h3>About Property</h3>
+              <p>Your trusted partner in finding the perfect property</p>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="widget">
+              <h3>Quick Links</h3>
+              <ul class="list-unstyled">
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('property_list') }}">Properties</a></li>
+                <li><a href="{{ url_for('about') }}">About</a></li>
+                <li><a href="{{ url_for('property_agents') }}">Agents</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="widget">
+              <h3>Contact</h3>
+              <p>Email: info@property.com</p>
+              <p>Phone: +1 234 567 8900</p>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-5">
+          <div class="col-12 text-center">
+            <p>
+              &copy; <script>
+                document.write(new Date().getFullYear());
+              </script>
+              . All Rights Reserved. &mdash; Designed with love by
+              <a href="https://flowtech">flowtech</a>
+              <!-- License information: https://flowtech/license/ -->
+            </p>
+            <div>
+              Distributed by
+              <a href="https://marketonthego.com/" target="_blank">marketonthego</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/aos.js"></script>
+    <script>
+      AOS.init({
+        duration: 800,
+        easing: 'slide',
+        once: true
+      });
+    </script>
+  </body>
+</html>

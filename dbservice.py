@@ -7,11 +7,19 @@ from wtforms.validators import DataRequired, Length, Email, EqualTo, NumberRange
 from enum import Enum
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key_here'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///myproperty.db'
+
+# Database configuration from environment variables
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///myproperty.db")
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -24,7 +32,10 @@ def create_app():
                 static_folder='.', 
                 static_url_path='')
     app.config['SECRET_KEY'] = 'your_secret_key_here'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///myproperty.db'
+    
+    # Database configuration from environment variables
+    DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///myproperty.db")
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
@@ -77,6 +88,21 @@ class User(db.Model):
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
+
+    def get_id(self):
+        return str(self.id)
+
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_active(self):
+        return self.__dict__.get('is_active', True)
+
+    @property
+    def is_anonymous(self):
+        return False
 
 class PropertyType(db.Model):
     __tablename__ = 'property_types'
@@ -167,6 +193,7 @@ class Property(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
+    # Location relationship is defined in Location model as 'properties' with backref='location_obj'
     inquiries = db.relationship('Inquiry', backref='property', lazy=True, cascade='all, delete-orphan')
 
 class Inquiry(db.Model):
@@ -190,13 +217,23 @@ class LoginForm(FlaskForm):
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=4, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    first_name = StringField('First Name', validators=[DataRequired(), Length(max=50)])
-    last_name = StringField('Last Name', validators=[DataRequired(), Length(max=50)])
-    phone = StringField('Phone')
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
-    confirm_password = PasswordField('Confirm Password', 
-                                   validators=[DataRequired(), EqualTo('password')])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    first_name = StringField('First Name', validators=[DataRequired(), Length(min=2, max=50)])
+    last_name = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=50)])
+    phone = StringField('Phone', validators=[Length(max=20)])
     submit = SubmitField('Register')
+
+class AdminRegistrationForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired(), Length(min=4, max=20)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    first_name = StringField('First Name', validators=[DataRequired(), Length(min=2, max=50)])
+    last_name = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=50)])
+    phone = StringField('Phone', validators=[Length(max=20)])
+    role = SelectField('Role', choices=[('USER', 'User'), ('ADMIN', 'Admin')], default='USER')
+    submit = SubmitField('Create Admin Account')
 
 class PropertyForm(FlaskForm):
     title = StringField('Property Title', validators=[DataRequired(), Length(max=200)])

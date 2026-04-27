@@ -1,0 +1,250 @@
+<!-- /*
+* Template Name: Property
+* Template Author: flowtech
+* Template URI: https://flowtech/
+* License: https://creativecommons.org/licenses/by/3.0/
+*/ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="flowtech" />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    <meta name="description" content="" />
+    <meta name="keywords" content="bootstrap, bootstrap5" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+
+    <title>
+      Admin Setup - Property
+    </title>
+  </head>
+  <body>
+    <div
+      class="hero page-inner overlay"
+      style="background-image: url('/images/hero_bg_1.jpg')"
+    >
+      <div class="container">
+        <div class="row justify-content-center align-items-center">
+          <div class="col-lg-5 text-center mt-5">
+            <h1 class="heading" data-aos="fade-up">Admin Setup</h1>
+            <p class="text-white mb-4" data-aos="fade-up" data-aos-delay="100">
+              Initial administrator setup for Property Management System
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-6">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <div class="bg-white p-5 rounded shadow" data-aos="fade-up">
+              <h3 class="text-center mb-4">Create Administrator Account</h3>
+              <p class="text-center mb-4 text-muted">
+                This page creates the first administrator account. Once created, this setup page will be disabled.
+              </p>
+
+              <form method="POST" action="{{ url_for('admin_setup') }}">
+                {{ form.hidden_tag() }}
+                
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="first_name" class="form-label">First Name</label>
+                    {{ form.first_name(class="form-control") }}
+                    {% if form.first_name.errors %}
+                      <div class="text-danger">
+                        {% for error in form.first_name.errors %}
+                          <small>{{ error }}</small>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="last_name" class="form-label">Last Name</label>
+                    {{ form.last_name(class="form-control") }}
+                    {% if form.last_name.errors %}
+                      <div class="text-danger">
+                        {% for error in form.last_name.errors %}
+                          <small>{{ error }}</small>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="username" class="form-label">Username</label>
+                  {{ form.username(class="form-control") }}
+                  {% if form.username.errors %}
+                    <div class="text-danger">
+                      {% for error in form.username.errors %}
+                        <small>{{ error }}</small>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+
+                <div class="mb-3">
+                  <label for="email" class="form-label">Email</label>
+                  {{ form.email(class="form-control") }}
+                  {% if form.email.errors %}
+                    <div class="text-danger">
+                      {% for error in form.email.errors %}
+                        <small>{{ error }}</small>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+
+                <div class="mb-3">
+                  <label for="phone" class="form-label">Phone</label>
+                  {{ form.phone(class="form-control") }}
+                  {% if form.phone.errors %}
+                    <div class="text-danger">
+                      {% for error in form.phone.errors %}
+                        <small>{{ error }}</small>
+                      {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                  <label for="password" class="form-label">Password</label>
+                  {{ form.password(class="form-control") }}
+                  {% if form.password.errors %}
+                    <div class="text-danger">
+                      {% for error in form.password.errors %}
+                        <small>{{ error }}</small>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+
+                <div class="mb-4">
+                  <label for="confirm_password" class="form-label">Confirm Password</label>
+                  {{ form.confirm_password(class="form-control") }}
+                  {% if form.confirm_password.errors %}
+                    <div class="text-danger">
+                      {% for error in form.confirm_password.errors %}
+                        <small>{{ error }}</small>
+                      {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                  <label for="role" class="form-label">Role</label>
+                  {{ form.role(class="form-select") }}
+                  {% if form.role.errors %}
+                    <div class="text-danger">
+                      {% for error in form.role.errors %}
+                        <small>{{ error }}</small>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+
+                <div class="d-grid">
+                  {{ form.submit(class="btn btn-primary") }}
+                </div>
+              </form>
+
+              <hr class="my-4">
+              
+              <div class="text-center">
+                <p class="mb-0 text-muted">
+                  <strong>Default Admin Credentials:</strong><br>
+                  Email: admin@property.com<br>
+                  Password: admin123
+                </p>
+                <a href="{{ url_for('login') }}" class="btn btn-outline-secondary btn-sm">
+                  Go to Login
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-4">
+            <div class="widget">
+              <h3>About Property</h3>
+              <p>Your trusted partner in finding the perfect property</p>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="widget">
+              <h3>Quick Links</h3>
+              <ul class="list-unstyled">
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('property_list') }}">Properties</a></li>
+                <li><a href="{{ url_for('about') }}">About</a></li>
+                <li><a href="{{ url_for('property_agents') }}">Agents</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="widget">
+              <h3>Contact</h3>
+              <p>Email: info@property.com</p>
+              <p>Phone: +1 234 567 8900</p>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-5">
+          <div class="col-12 text-center">
+            <p>
+              &copy; <script>
+                document.write(new Date().getFullYear());
+              </script>
+              . All Rights Reserved. &mdash; Designed with love by
+              <a href="https://flowtech">flowtech</a>
+              <!-- License information: https://flowtech/license/ -->
+            </p>
+            <div>
+              Distributed by
+              <a href="https://marketonthego.com/" target="_blank">marketonthego</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/aos.js"></script>
+    <script>
+      AOS.init({
+        duration: 800,
+        easing: 'slide',
+        once: true
+      });
+    </script>
+  </body>
+</html>

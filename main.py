@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from dbservice import create_app, db, bcrypt, User, Property, PropertyType, Location, Agent, Inquiry, UserRole, ListingType, PropertyStatus
-from dbservice import LoginForm, RegistrationForm, PropertyForm, InquiryForm
+from dbservice import LoginForm, RegistrationForm, PropertyForm, InquiryForm, AdminRegistrationForm
 
 # Initialize Flask app
 app = create_app()
@@ -50,9 +50,19 @@ def properties_html():
     """Properties page (backward compatibility)"""
     return redirect(url_for('property_list'))
 
-@app.route('/property-single.html')
+@app.route('/property-detail.html')
 def property_single_html():
     """Property single page (backward compatibility)"""
+    return redirect(url_for('property_list'))
+
+@app.route('/property-detail')
+def property_detail_alt():
+    """Property detail page (backward compatibility)"""
+    return redirect(url_for('property_list'))
+
+@app.route('/propertydetails')
+def property_details_alt():
+    """Property detail page (backward compatibility)"""
     return redirect(url_for('property_list'))
 
 @app.route('/about.html')
@@ -137,7 +147,7 @@ def property_detail(property_id):
         Property.status == PropertyStatus.AVAILABLE
     ).limit(3).all()
     
-    return render_template('property-single.html', 
+    return render_template('property-detail.html', 
                          property=property, 
                          similar_properties=similar_properties)
 
@@ -154,7 +164,14 @@ def login():
             login_user(user, remember=True)
             flash('Login successful!', 'success')
             next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('index'))
+            
+            # Redirect to appropriate dashboard based on user role
+            if next_page:
+                return redirect(next_page)
+            elif user.role == UserRole.ADMIN:
+                return redirect(url_for('admin_dashboard'))
+            else:
+                return redirect(url_for('user_dashboard'))
         else:
             flash('Login unsuccessful. Please check email and password.', 'danger')
     
@@ -203,9 +220,304 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('index'))
 
+@app.route('/admin/register', methods=['GET', 'POST'])
+def admin_register():
+    """Admin registration"""
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    
+    form = AdminRegistrationForm()
+    if form.validate_on_submit():
+        # Check if user already exists
+        if User.query.filter_by(email=form.email.data).first():
+            flash('Email already registered.', 'danger')
+            return render_template('admin/register.html', form=form)
+        
+        if User.query.filter_by(username=form.username.data).first():
+            flash('Username already taken.', 'danger')
+            return render_template('admin/register.html', form=form)
+        
+        # Create new admin user
+        user = User(
+            username=form.username.data,
+            email=form.email.data,
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            phone=form.phone.data,
+            role=UserRole.ADMIN
+        )
+        user.set_password(form.password.data)
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        flash('Admin account created successfully! Please log in.', 'success')
+        return redirect(url_for('login'))
+    
+    return render_template('admin/register.html', form=form)
+
+# Admin Routes
+@app.route('/admin/dashboard')
+@login_required
+def admin_dashboard():
+    """Admin dashboard - only accessible by admin users"""
+    if current_user.role != UserRole.ADMIN:
+        flash('Access denied. Admin privileges required.', 'danger')
+        return redirect(url_for('index'))
+    
+    # Get statistics
+    total_properties = Property.query.count()
+    total_users = User.query.count()
+    total_agents = Agent.query.count()
+    total_inquiries = Inquiry.query.count()
+    
+    # Get recent properties
+    recent_properties = Property.query.order_by(Property.created_at.desc()).limit(5).all()
+    
+    return render_template('admin/dashboard.html',
+                         total_properties=total_properties,
+                         total_users=total_users,
+                         total_agents=total_agents,
+                         total_inquiries=total_inquiries,
+                         recent_properties=recent_properties)
+
+@app.route('/admin/properties')
+@login_required
+def admin_properties():
+    """Admin manage properties page"""
+    if current_user.role != UserRole.ADMIN:
+        flash('Access denied. Admin privileges required.', 'danger')
+        return redirect(url_for('index'))
+    
+    page = request.args.get('page', 1, type=int)
+    properties = Property.query.order_by(Property.created_at.desc()).paginate(
+        page=page, per_page=20, error_out=False
+    )
+    
+    return render_template('admin/properties.html', properties=properties)
+
+@app.route('/admin/users')
+@login_required
+def admin_users():
+    """Admin manage users page"""
+    if current_user.role != UserRole.ADMIN:
+        flash('Access denied. Admin privileges required.', 'danger')
+        return redirect(url_for('index'))
+    
+    page = request.args.get('page', 1, type=int)
+    users = User.query.order_by(User.created_at.desc()).paginate(
+        page=page, per_page=20, error_out=False
+    )
+    
+    return render_template('admin/users.html', users=users)
+
+@app.route('/admin/agents')
+@login_required
+def admin_agents():
+    """Admin manage agents page"""
+    if current_user.role != UserRole.ADMIN:
+        flash('Access denied. Admin privileges required.', 'danger')
+        return redirect(url_for('index'))
+    
+    page = request.args.get('page', 1, type=int)
+    agents = Agent.query.order_by(Agent.created_at.desc()).paginate(
+        page=page, per_page=20, error_out=False
+    )
+    
+    return render_template('admin/agents.html', agents=agents)
+
+@app.route('/admin/inquiries')
+@login_required
+def admin_inquiries():
+    """Admin manage inquiries page"""
+    if current_user.role != UserRole.ADMIN:
+        flash('Access denied. Admin privileges required.', 'danger')
+        return redirect(url_for('index'))
+    
+    page = request.args.get('page', 1, type=int)
+    inquiries = Inquiry.query.order_by(Inquiry.created_at.desc()).paginate(
+        page=page, per_page=20, error_out=False
+    )
+    
+    return render_template('admin/inquiries.html', inquiries=inquiries)
+
+@app.route('/admin/property/<int:property_id>/edit', methods=['GET', 'POST'])
+@login_required
+def admin_edit_property(property_id):
+    """Admin edit property"""
+    if current_user.role != UserRole.ADMIN:
+        flash('Access denied. Admin privileges required.', 'danger')
+        return redirect(url_for('index'))
+    
+    property = Property.query.get_or_404(property_id)
+    form = PropertyForm(obj=property)
+    
+    # Populate choices
+    form.property_type_id.choices = [(pt.id, pt.name) for pt in PropertyType.query.all()]
+    form.location_id.choices = [(l.id, f"{l.city}, {l.state}") for l in Location.query.all()]
+    
+    if form.validate_on_submit():
+        # Handle main image upload
+        if 'main_image' in request.files:
+            file = request.files['main_image']
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{filename}"
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                property.main_image = filename
+        
+        # Update property
+        property.title = form.title.data
+        property.description = form.description.data
+        property.price = form.price.data
+        property.address = form.address.data
+        property.property_type_id = form.property_type_id.data
+        property.location_id = form.location_id.data
+        property.listing_type = ListingType(form.listing_type.data)
+        property.square_feet = form.square_feet.data
+        property.bedrooms = form.bedrooms.data
+        property.bathrooms = form.bathrooms.data
+        property.garages = form.garages.data
+        property.year_built = form.year_built.data
+        
+        db.session.commit()
+        flash('Property updated successfully!', 'success')
+        return redirect(url_for('admin_dashboard'))
+    
+    return render_template('admin/edit_property.html', form=form, property=property)
+
+# User Routes
+@app.route('/user/dashboard')
+@login_required
+def user_dashboard():
+    """User dashboard"""
+    # Get user's properties
+    my_properties = Property.query.filter_by(owner_id=current_user.id).all()
+    
+    # Get user's inquiries
+    my_inquiries = Inquiry.query.filter_by(user_id=current_user.id).all()
+    
+    # For now, saved properties will be empty (we can implement this later)
+    saved_properties = []
+    
+    return render_template('user/dashboard.html',
+                         my_properties=my_properties,
+                         my_inquiries=my_inquiries,
+                         saved_properties=saved_properties)
+
+@app.route('/user/properties')
+@login_required
+def user_properties():
+    """User's properties page"""
+    page = request.args.get('page', 1, type=int)
+    properties = Property.query.filter_by(owner_id=current_user.id).order_by(Property.created_at.desc()).paginate(
+        page=page, per_page=10, error_out=False
+    )
+    
+    return render_template('user/properties.html', properties=properties)
+
+@app.route('/user/inquiries')
+@login_required
+def user_inquiries():
+    """User's inquiries page"""
+    page = request.args.get('page', 1, type=int)
+    inquiries = Inquiry.query.filter_by(user_id=current_user.id).order_by(Inquiry.created_at.desc()).paginate(
+        page=page, per_page=10, error_out=False
+    )
+    
+    return render_template('user/inquiries.html', inquiries=inquiries)
+
+@app.route('/user/profile', methods=['GET', 'POST'])
+@login_required
+def user_profile():
+    """User profile page"""
+    form = RegistrationForm(obj=current_user)
+    form.submit.data = 'Update Profile'
+    
+    if form.validate_on_submit():
+        # Check if email is being changed and if it's already taken
+        if form.email.data != current_user.email:
+            if User.query.filter_by(email=form.email.data).first():
+                flash('Email already registered.', 'danger')
+                return render_template('user/profile.html', form=form)
+        
+        # Check if username is being changed and if it's already taken
+        if form.username.data != current_user.username:
+            if User.query.filter_by(username=form.username.data).first():
+                flash('Username already taken.', 'danger')
+                return render_template('user/profile.html', form=form)
+        
+        # Update user info
+        current_user.username = form.username.data
+        current_user.email = form.email.data
+        current_user.first_name = form.first_name.data
+        current_user.last_name = form.last_name.data
+        current_user.phone = form.phone.data
+        
+        # Update password if provided
+        if form.password.data:
+            current_user.set_password(form.password.data)
+        
+        db.session.commit()
+        flash('Profile updated successfully!', 'success')
+        return redirect(url_for('user_dashboard'))
+    
+    return render_template('user/profile.html', form=form)
+
+@app.route('/user/property/<int:property_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_property(property_id):
+    """User edit their own property"""
+    property = Property.query.get_or_404(property_id)
+    
+    # Check if user owns this property
+    if property.owner_id != current_user.id:
+        flash('Access denied. You can only edit your own properties.', 'danger')
+        return redirect(url_for('user_dashboard'))
+    
+    form = PropertyForm(obj=property)
+    
+    # Populate choices
+    form.property_type_id.choices = [(pt.id, pt.name) for pt in PropertyType.query.all()]
+    form.location_id.choices = [(l.id, f"{l.city}, {l.state}") for l in Location.query.all()]
+    
+    if form.validate_on_submit():
+        # Handle main image upload
+        if 'main_image' in request.files:
+            file = request.files['main_image']
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{filename}"
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                property.main_image = filename
+        
+        # Update property
+        property.title = form.title.data
+        property.description = form.description.data
+        property.price = form.price.data
+        property.address = form.address.data
+        property.property_type_id = form.property_type_id.data
+        property.location_id = form.location_id.data
+        property.listing_type = ListingType(form.listing_type.data)
+        property.square_feet = form.square_feet.data
+        property.bedrooms = form.bedrooms.data
+        property.bathrooms = form.bathrooms.data
+        property.garages = form.garages.data
+        property.year_built = form.year_built.data
+        
+        db.session.commit()
+        flash('Property updated successfully!', 'success')
+        return redirect(url_for('user_properties'))
+    
+    return render_template('user/edit_property.html', form=form, property=property)
+
 @app.route('/add-property', methods=['GET', 'POST'])
 @login_required
 def add_property():
+    """Add new property - only for agents and admins"""
+    if current_user.role not in [UserRole.AGENT, UserRole.ADMIN]:
+        flash('Only agents and admins can add properties.', 'danger')
+        return redirect(url_for('property_list'))
     """Add new property"""
     form = PropertyForm()
     
@@ -431,6 +743,40 @@ def create_sample_data():
             db.session.commit()
             
             print("Sample data created successfully!")
+
+@app.route('/admin/setup', methods=['GET', 'POST'])
+def admin_setup():
+    """One-time admin setup page"""
+    # Check if admin already exists
+    existing_admin = User.query.filter_by(role=UserRole.ADMIN).first()
+    if existing_admin:
+        flash('Administrator account already exists. Please use login.', 'warning')
+        return redirect(url_for('login'))
+    
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    
+    form = AdminRegistrationForm()
+    
+    if form.validate_on_submit():
+        # Create admin user
+        admin_user = User(
+            username=form.username.data,
+            email=form.email.data,
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            phone=form.phone.data,
+            role=UserRole(form.role.data)
+        )
+        admin_user.set_password(form.password.data)
+        
+        db.session.add(admin_user)
+        db.session.commit()
+        
+        flash('Administrator account created successfully! Please log in.', 'success')
+        return redirect(url_for('login'))
+    
+    return render_template('admin/setup.html', form=form)
 
 if __name__ == '__main__':
     with app.app_context():

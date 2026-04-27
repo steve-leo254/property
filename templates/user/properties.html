@@ -1,0 +1,284 @@
+<!-- /*
+* Template Name: Property
+* Template Author: flowtech
+* Template URI: https://flowtech/
+* License: https://creativecommons.org/licenses/by/3.0/
+*/ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="flowtech" />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    <meta name="description" content="" />
+    <meta name="keywords" content="bootstrap, bootstrap5" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+
+    <title>
+      Property &mdash; Free Bootstrap 5 Website Template by flowtech
+    </title>
+  </head>
+  <body>
+    <div class="site-mobile-menu site-navbar-target">
+      <div class="site-mobile-menu-header">
+        <div class="site-mobile-menu-close">
+          <span class="icofont-close js-menu-toggle"></span>
+        </div>
+      </div>
+      <div class="site-mobile-menu-body"></div>
+    </div>
+
+    <nav class="site-nav">
+      <div class="container">
+        <div class="menu-bg-wrap">
+          <div class="site-navigation">
+            <a href="{{ url_for('index') }}" class="logo m-0 float-start">Property</a>
+
+            <ul
+              class="js-clone-nav d-none d-lg-inline-block text-start site-menu float-end"
+            >
+              <li><a href="{{ url_for('index') }}">Home</a></li>
+              <li><a href="{{ url_for('property_list') }}">Properties</a></li>
+              <li><a href="{{ url_for('about') }}">About</a></li>
+              <li><a href="{{ url_for('property_agents') }}">Agents</a></li>
+              {% if current_user.is_authenticated %}
+              <li class="has-children">
+                <a href="#">{{ current_user.username }}</a>
+                <ul class="dropdown">
+                  {% if current_user.role == 'ADMIN' %}
+                    <li><a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a></li>
+                  {% else %}
+                    <li><a href="{{ url_for('user_dashboard') }}">My Dashboard</a></li>
+                    <li><a href="{{ url_for('user_profile') }}">My Profile</a></li>
+                    <li><a href="{{ url_for('user_properties') }}">My Properties</a></li>
+                  {% endif %}
+                  <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                </ul>
+              </li>
+            {% else %}
+              <li><a href="{{ url_for('login') }}">Login</a></li>
+              <li><a href="{{ url_for('register') }}">Register</a></li>
+            {% endif %}
+            </ul>
+
+            <a
+              href="#"
+              class="burger light me-auto float-end mt-1 site-menu-toggle js-menu-toggle d-inline-block d-lg-none"
+              data-toggle="collapse"
+              data-target="#main-navbar"
+            >
+              <span></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div
+      class="hero page-inner overlay"
+      style="background-image: url('/images/hero_bg_1.jpg')"
+    >
+      <div class="container">
+        <div class="row justify-content-center align-items-center">
+          <div class="col-lg-9 text-center mt-5">
+            <h1 class="heading" data-aos="fade-up">My Properties</h1>
+            <nav
+              aria-label="breadcrumb"
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
+              <ol class="breadcrumb text-center justify-content-center">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('user_dashboard') }}">My Dashboard</a></li>
+                <li
+                  class="breadcrumb-item active text-white-50"
+                  aria-current="page"
+                >
+                  My Properties
+                </li>
+              </ol>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section section-properties">
+      <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        {% if properties.items %}
+          <div class="row">
+            {% for property in properties.items %}
+              <div class="col-md-6 col-lg-4 mb-4" data-aos="fade-up">
+                <div class="property-item">
+                  <a href="{{ url_for('property_detail', property_id=property.id) }}" class="img">
+                    {% if property.main_image %}
+                      <img src="static/uploads/{{ property.main_image }}" alt="Image" class="img-fluid" />
+                    {% else %}
+                      <img src="images/img_1.jpg" alt="Image" class="img-fluid" />
+                    {% endif %}
+                  </a>
+                  <div class="property-content">
+                    <div class="price mb-2"><span>${{ "%.2f"|format(property.price) }}</span></div>
+                    <div>
+                      <span class="d-block mb-2 text-black-50">{{ property.listing_type.value.replace('_', ' ').title() }}</span>
+                      <h3><a href="{{ url_for('property_detail', property_id=property.id) }}">{{ property.title }}</a></h3>
+                      <p>{{ property.address }}</p>
+                    </div>
+                    <div class="specs d-flex mb-3">
+                      <span class="d-block d-flex align-items-center me-3">
+                        <span class="icon-bed me-2"></span>
+                        <span class="caption">{{ property.bedrooms }} beds</span>
+                      </span>
+                      <span class="d-block d-flex align-items-center">
+                        <span class="icon-bath me-2"></span>
+                        <span class="caption">{{ property.bathrooms }} baths</span>
+                      </span>
+                    </div>
+                    <div class="specs d-flex mb-3">
+                      <span class="d-block d-flex align-items-center">
+                        <span class="icon-bed me-2"></span>
+                        <span class="caption">{{ property.square_feet }} sqft</span>
+                      </span>
+                    </div>
+                    <div class="mb-4">
+                      <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('user_edit_property', property_id=property.id) }}" class="btn btn-primary">Edit</a>
+                        <a href="#" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this property?')">Delete</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="col-12 text-center">
+            <p>You haven't added any properties yet.</p>
+            {% if current_user.role in ['ADMIN', 'AGENT'] %}<a href="{{ url_for('add_property') }}" class="btn btn-primary">Add Your First Property</a>{% endif %}
+          </div>
+        {% endif %}
+
+        <!-- Pagination -->
+        {% if properties.pages > 1 %}
+          <div class="row mt-5">
+            <div class="col-12">
+              <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                  {% if properties.has_prev %}
+                    <li class="page-item">
+                      <a class="page-link" href="{{ url_for('user_properties', page=properties.prev_num) }}">Previous</a>
+                    </li>
+                  {% endif %}
+                  
+                  {% for page_num in properties.iter_pages() %}
+                    {% if page_num %}
+                      {% if page_num != properties.page %}
+                        <li class="page-item">
+                          <a class="page-link" href="{{ url_for('user_properties', page=page_num) }}">{{ page_num }}</a>
+                        </li>
+                      {% else %}
+                        <li class="page-item active">
+                          <span class="page-link">{{ page_num }}</span>
+                        </li>
+                      {% endif %}
+                    {% else %}
+                      <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                  
+                  {% if properties.has_next %}
+                    <li class="page-item">
+                      <a class="page-link" href="{{ url_for('user_properties', page=properties.next_num) }}">Next</a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </nav>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="site-footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-4">
+            <div class="widget">
+              <h3>About Property</h3>
+              <p>Your trusted partner in finding the perfect property</p>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="widget">
+              <h3>Quick Links</h3>
+              <ul class="list-unstyled">
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('property_list') }}">Properties</a></li>
+                <li><a href="{{ url_for('about') }}">About</a></li>
+                <li><a href="{{ url_for('property_agents') }}">Agents</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="widget">
+              <h3>Contact</h3>
+              <p>Email: info@flowtech</p>
+              <p>Phone: +1 234 567 8900</p>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-5">
+          <div class="col-12 text-center">
+            <p>
+              &copy; <script>
+                document.write(new Date().getFullYear());
+              </script>
+              . All Rights Reserved. &mdash; Designed with love by
+              <a href="https://flowtech">flowtech</a>
+              <!-- License information: https://flowtech/license/ -->
+            </p>
+            <div>
+              Distributed by
+              <a href="https://marketonthego.com/" target="_blank">marketonthego</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/aos.js"></script>
+    <script src="/js/navbar.js"></script>
+    <script>
+      AOS.init({
+        duration: 800,
+        easing: 'slide',
+        once: true
+      });
+    </script>
+  </body>
+</html>

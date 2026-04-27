@@ -1,7 +1,7 @@
 <!-- /*
 * Template Name: Property
-* Template Author: Untree.co
-* Template URI: https://untree.co/
+* Template Author: flowtech
+* Template URI: https://flowtech/
 * License: https://creativecommons.org/licenses/by/3.0/
 */ -->
 <!DOCTYPE html>
@@ -9,7 +9,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="author" content="Untree.co" />
+    <meta name="author" content="flowtech" />
     <link rel="shortcut icon" href="favicon.png" />
 
     <meta name="description" content="" />
@@ -30,7 +30,7 @@
     <link rel="stylesheet" href="/css/style.css" />
 
     <title>
-      Property &mdash; Free Bootstrap 5 Website Template by Untree.co
+      Property &mdash; Free Bootstrap 5 Website Template by flowtech
     </title>
   </head>
   <body>
@@ -62,8 +62,24 @@
               </li>
               <li><a href="{{ url_for('about') }}">About</a></li>
               <li><a href="{{ url_for('property_agents') }}">Agents</a></li>
+              {% if current_user.is_authenticated %}
+              <li class="has-children">
+                <a href="#">{{ current_user.username }}</a>
+                <ul class="dropdown">
+                  {% if current_user.role == 'ADMIN' %}
+                    <li><a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a></li>
+                  {% else %}
+                    <li><a href="{{ url_for('user_dashboard') }}">My Dashboard</a></li>
+                    <li><a href="{{ url_for('user_profile') }}">My Profile</a></li>
+                    <li><a href="{{ url_for('user_properties') }}">My Properties</a></li>
+                  {% endif %}
+                  <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                </ul>
+              </li>
+            {% else %}
               <li><a href="{{ url_for('login') }}">Login</a></li>
               <li><a href="{{ url_for('register') }}">Register</a></li>
+            {% endif %}
             </ul>
 
             <a
@@ -258,7 +274,7 @@
             <!-- 
               **==========
               NOTE: 
-              Please don't remove this copyright link unless you buy the license here https://untree.co/license/  
+              Please don't remove this copyright link unless you buy the license here https://flowtech/license/  
               **==========
             -->
 
@@ -268,12 +284,12 @@
                 document.write(new Date().getFullYear());
               </script>
               . All Rights Reserved. &mdash; Designed with love by
-              <a href="https://untree.co">Untree.co</a>
-              <!-- License information: https://untree.co/license/ -->
+              <a href="https://flowtech">flowtech</a>
+              <!-- License information: https://flowtech/license/ -->
             </p>
             <div>
               Distributed by
-              <a href="https://themewagon.com/" target="_blank">themewagon</a>
+              <a href="https://marketonthego.com/" target="_blank">marketonthego</a>
             </div>
           </div>
         </div>

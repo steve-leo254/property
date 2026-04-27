@@ -1,0 +1,263 @@
+<!-- /*
+* Template Name: Property
+* Template Author: flowtech
+* Template URI: https://flowtech/
+* License: https://creativecommons.org/licenses/by/3.0/
+*/ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="flowtech" />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    <meta name="description" content="" />
+    <meta name="keywords" content="bootstrap, bootstrap5" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+
+    <title>Admin Dashboard - Property</title>
+  </head>
+  <body>
+    <div class="site-mobile-menu site-navbar-target">
+      <div class="site-mobile-menu-header">
+        <div class="site-mobile-menu-close">
+          <span class="icofont-close js-menu-toggle"></span>
+        </div>
+      </div>
+      <div class="site-mobile-menu-body"></div>
+    </div>
+
+    <nav class="site-nav">
+      <div class="container">
+        <div class="menu-bg-wrap">
+          <div class="site-navigation">
+            <a href="{{ url_for('index') }}" class="logo m-0 float-start">Property</a>
+
+            <ul
+              class="js-clone-nav d-none d-lg-inline-block text-start site-menu float-end"
+            >
+              <li><a href="{{ url_for('index') }}">Home</a></li>
+              <li><a href="{{ url_for('property_list') }}">Properties</a></li>
+              <li><a href="{{ url_for('about') }}">About</a></li>
+              <li class="has-children">
+                <a href="#">Admin</a>
+                <ul class="dropdown">
+                  <li class="active"><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+                  <li><a href="{{ url_for('admin_properties') }}">Manage Properties</a></li>
+                  <li><a href="{{ url_for('admin_users') }}">Manage Users</a></li>
+                  <li><a href="{{ url_for('admin_agents') }}">Manage Agents</a></li>
+                </ul>
+              </li>
+              <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            </ul>
+
+            <a
+              href="#"
+              class="burger light me-auto float-end mt-1 site-menu-toggle js-menu-toggle d-inline-block d-lg-none"
+              data-toggle="collapse"
+              data-target="#main-navbar"
+            >
+              <span></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div
+      class="hero page-inner overlay"
+      style="background-image: url('/images/hero_bg_1.jpg')"
+    >
+      <div class="container">
+        <div class="row justify-content-center align-items-center">
+          <div class="col-lg-9 text-center mt-5">
+            <h1 class="heading" data-aos="fade-up">Admin Dashboard</h1>
+            <nav
+              aria-label="breadcrumb"
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
+              <ol class="breadcrumb text-center justify-content-center">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">Dashboard</li>
+              </ol>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="row mb-4">
+          <div class="col-md-3">
+            <div class="card text-center">
+              <div class="card-body">
+                <h5 class="card-title">{{ total_properties }}</h5>
+                <p class="card-text">Total Properties</p>
+                <a href="{{ url_for('admin_properties') }}" class="btn btn-primary">View All</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card text-center">
+              <div class="card-body">
+                <h5 class="card-title">{{ total_users }}</h5>
+                <p class="card-text">Total Users</p>
+                <a href="{{ url_for('admin_users') }}" class="btn btn-primary">View All</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card text-center">
+              <div class="card-body">
+                <h5 class="card-title">{{ total_agents }}</h5>
+                <p class="card-text">Total Agents</p>
+                <a href="{{ url_for('admin_agents') }}" class="btn btn-primary">View All</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card text-center">
+              <div class="card-body">
+                <h5 class="card-title">{{ total_inquiries }}</h5>
+                <p class="card-text">Total Inquiries</p>
+                <a href="{{ url_for('admin_inquiries') }}" class="btn btn-primary">View All</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-lg-8">
+            <div class="card">
+              <div class="card-header">
+                <h5>Recent Properties</h5>
+              </div>
+              <div class="card-body">
+                {% if recent_properties %}
+                  <div class="table-responsive">
+                    <table class="table table-striped">
+                      <thead>
+                        <tr>
+                          <th>Title</th>
+                          <th>Price</th>
+                          <th>Type</th>
+                          <th>Status</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for property in recent_properties %}
+                        <tr>
+                          <td>{{ property.title }}</td>
+                          <td>${{ "%.2f"|format(property.price) }}</td>
+                          <td>{{ property.property_type_obj.name }}</td>
+                          <td>
+                            <span class="badge bg-{{ 'success' if property.status.value == 'AVAILABLE' else 'warning' }}">
+                              {{ property.status.value }}
+                            </span>
+                          </td>
+                          <td>
+                            <a href="{{ url_for('admin_edit_property', property_id=property.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <a href="{{ url_for('property_detail', property_id=property.id) }}" class="btn btn-sm btn-outline-info">View</a>
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% else %}
+                  <p>No properties found.</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="card">
+              <div class="card-header">
+                <h5>Quick Actions</h5>
+              </div>
+              <div class="card-body">
+                <div class="d-grid gap-2">
+                  <a href="{{ url_for('add_property') }}" class="btn btn-primary">Add New Property</a>
+                  <a href="{{ url_for('admin_users') }}" class="btn btn-outline-primary">Manage Users</a>
+                  <a href="{{ url_for('admin_agents') }}" class="btn btn-outline-primary">Manage Agents</a>
+                  <a href="{{ url_for('admin_inquiries') }}" class="btn btn-outline-primary">View Inquiries</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-4">
+            <div class="widget">
+              <h3>About Property</h3>
+              <p>Your trusted partner in finding the perfect property</p>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="widget">
+              <h3>Quick Links</h3>
+              <ul class="list-unstyled">
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('property_list') }}">Properties</a></li>
+                <li><a href="{{ url_for('about') }}">About</a></li>
+                <li><a href="{{ url_for('property_agents') }}">Agents</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="widget">
+              <h3>Contact</h3>
+              <p>Email: info@property.com</p>
+              <p>Phone: +1 234 567 8900</p>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-5">
+          <div class="col-12 text-center">
+            <p>&copy; <script>document.write(new Date().getFullYear());</script> Property. All Rights Reserved.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/aos.js"></script>
+    <script src="/js/navbar.js"></script>
+    <script>
+      AOS.init({
+        duration: 800,
+        easing: 'slide',
+        once: true
+      });
+    </script>
+  </body>
+</html>
