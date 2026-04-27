@@ -188,11 +188,11 @@
                   </div>
                   
                   <div class="col-md-4 mb-3">
-                    {{ form.location_id.label(class="form-label") }}
-                    {{ form.location_id(class="form-select") }}
-                    {% if form.location_id.errors %}
+                    {{ form.location.label(class="form-label") }}
+                    {{ form.location(class="form-control") }}
+                    {% if form.location.errors %}
                       <div class="text-danger">
-                        {% for error in form.location_id.errors %}
+                        {% for error in form.location.errors %}
                           <small>{{ error }}</small>
                         {% endfor %}
                       </div>
@@ -276,7 +276,47 @@
                   </div>
                 </div>
 
+                <!-- Image Upload Section -->
+                <div class="row mt-4">
+                  <div class="col-12">
+                    <h4>Property Images</h4>
+                  </div>
+                </div>
+                
                 <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="main_image" class="form-label">Main Property Image</label>
+                      <input type="file" name="main_image" id="main_image" class="form-control" accept="image/*">
+                      <small class="text-muted">Upload the main image for the property (PNG, JPG, JPEG, GIF - Max 16MB)</small>
+                      {% if property.main_image %}
+                        <div class="mt-2">
+                          <small class="text-muted">Current main image:</small><br>
+                          <img src="/static/uploads/{{ property.main_image }}" alt="Current main image" class="img-thumbnail" style="max-height: 100px;">
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="image_gallery" class="form-label">Additional Images</label>
+                      <input type="file" name="image_gallery" id="image_gallery" class="form-control" accept="image/*" multiple>
+                      <small class="text-muted">Upload additional property images (PNG, JPG, JPEG, GIF - Max 16MB each). Hold Ctrl/Cmd to select multiple images.</small>
+                      {% if property.image_gallery %}
+                        <div class="mt-2">
+                          <small class="text-muted">Current gallery images:</small><br>
+                          <div class="d-flex flex-wrap gap-2">
+                            {% for image in property.image_gallery|safe %}
+                              <img src="/static/uploads/{{ image }}" alt="Gallery image {{ loop.index }}" class="img-thumbnail" style="max-height: 60px;">
+                            {% endfor %}
+                          </div>
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row mt-4">
                   <div class="col-md-6">
                     <div class="d-grid">
                       <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-primary">Cancel</a>
@@ -326,5 +366,35 @@
     <script src="/js/navbar.js"></script>
     <script src="/js/counter.js"></script>
     <script src="/js/custom.js"></script>
+    <script src="/js/counties.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const locationInput = document.querySelector('input[name="location"]');
+            if (locationInput && countiesData) {
+                // Convert to datalist for autocomplete
+                const datalist = document.createElement('datalist');
+                datalist.id = 'location-suggestions';
+                
+                // Add Kenya counties and towns
+                const kenyaCities = countiesData.Kenya;
+                kenyaCities.forEach(cityData => {
+                    // Add city
+                    const cityOption = document.createElement('option');
+                    cityOption.value = cityData.city;
+                    datalist.appendChild(cityOption);
+                    
+                    // Add towns
+                    cityData.towns.forEach(town => {
+                        const townOption = document.createElement('option');
+                        townOption.value = `${cityData.city} - ${town}`;
+                        datalist.appendChild(townOption);
+                    });
+                });
+                
+                locationInput.setAttribute('list', 'location-suggestions');
+                locationInput.parentNode.appendChild(datalist);
+            }
+        });
+    </script>
   </body>
 </html>

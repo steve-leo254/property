@@ -114,7 +114,7 @@
           <div class="col-md-4">
             <div class="card text-center">
               <div class="card-body">
-                <h5 class="card-title">{{ my_properties|length }}</h5>
+                <h5 class="card-title">{{ my_properties.total }}</h5>
                 <p class="card-text">My Properties</p>
                 <a href="{{ url_for('user_properties') }}" class="btn btn-primary">View All</a>
               </div>
@@ -160,10 +160,10 @@
                         </tr>
                       </thead>
                       <tbody>
-                        {% for property in my_properties[:5] %}
+                        {% for property in my_properties.items %}
                         <tr>
                           <td>{{ property.title }}</td>
-                          <td>${{ "%.2f"|format(property.price) }}</td>
+                          <td>KSh {{ "{:,.0f}".format(property.price * 130) }}</td>
                           <td>{{ property.property_type_obj.name }}</td>
                           <td>
                             <span class="badge bg-{{ 'success' if property.status.value == 'AVAILABLE' else 'warning' }}">
@@ -178,6 +178,56 @@
                         {% endfor %}
                       </tbody>
                     </table>
+                  
+                  <!-- Pagination -->
+                  {% if my_properties.pages > 1 %}
+                  <div class="row mt-4">
+                    <div class="col-lg-12">
+                      <nav aria-label="Properties pagination">
+                        <ul class="pagination justify-content-center">
+                          {% if my_properties.has_prev %}
+                            <li class="page-item">
+                              <a class="page-link" href="{{ url_for('user_dashboard', page=my_properties.prev_num) }}">Previous</a>
+                            </li>
+                          {% endif %}
+                          
+                          {% for page_num in my_properties.iter_pages() %}
+                            {% if page_num %}
+                              {% if page_num != my_properties.page %}
+                                <li class="page-item">
+                                  <a class="page-link" href="{{ url_for('user_dashboard', page=page_num) }}">{{ page_num }}</a>
+                                </li>
+                              {% else %}
+                                <li class="page-item active">
+                                  <span class="page-link">{{ page_num }}</span>
+                                </li>
+                              {% endif %}
+                            {% else %}
+                              <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                              </li>
+                            {% endif %}
+                          {% endfor %}
+                          
+                          {% if my_properties.has_next %}
+                            <li class="page-item">
+                              <a class="page-link" href="{{ url_for('user_dashboard', page=my_properties.next_num) }}">Next</a>
+                            </li>
+                          {% endif %}
+                        </ul>
+                      </nav>
+                      
+                      <div class="text-center mt-3">
+                        <small class="text-muted">
+                          Showing {{ my_properties.per_page }} of {{ my_properties.total }} properties
+                          {% if my_properties.total > my_properties.per_page %}
+                            - Page {{ my_properties.page }} of {{ my_properties.pages }}
+                          {% endif %}
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                  {% endif %}
                   </div>
                 {% else %}
                   <p>You haven't added any properties yet.</p>

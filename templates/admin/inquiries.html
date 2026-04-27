@@ -1,0 +1,426 @@
+<!-- /*
+* Template Name: Property
+* Template Author: flowtech
+* Template URI: https://flowtech/
+* License: https://creativecommons.org/licenses/by/3.0/
+*/ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="flowtech" />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    <meta name="description" content="" />
+    <meta name="keywords" content="bootstrap, bootstrap5" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+
+    <title>Manage Inquiries - Property</title>
+  </head>
+  <body>
+    <div class="site-mobile-menu site-navbar-target">
+      <div class="site-mobile-menu-header">
+        <div class="site-mobile-menu-close">
+          <span class="icofont-close js-menu-toggle"></span>
+        </div>
+      </div>
+      <div class="site-mobile-menu-body"></div>
+    </div>
+
+    <nav class="site-nav">
+      <div class="container">
+        <div class="menu-bg-wrap">
+          <div class="site-navigation">
+            <a href="{{ url_for('index') }}" class="logo m-0 float-start">Property</a>
+
+            <ul
+              class="js-clone-nav d-none d-lg-inline-block text-start site-menu float-end"
+            >
+              <li><a href="{{ url_for('index') }}">Home</a></li>
+              <li><a href="{{ url_for('property_list') }}">Properties</a></li>
+              <li><a href="{{ url_for('about') }}">About</a></li>
+              <li><a href="{{ url_for('property_agents') }}">Agents</a></li>
+              {% if current_user.is_authenticated %}
+                {% if current_user.role == 'ADMIN' %}
+                  <li class="has-children">
+                    <a href="#">Admin</a>
+                    <ul class="dropdown">
+                      <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+                      <li><a href="{{ url_for('admin_properties') }}">Properties</a></li>
+                      <li><a href="{{ url_for('admin_users') }}">Users</a></li>
+                      <li><a href="{{ url_for('admin_agents') }}">Agents</a></li>
+                      <li class="active"><a href="{{ url_for('admin_inquiries') }}">Inquiries</a></li>
+                      <li><a href="{{ url_for('admin_register') }}">Add Admin</a></li>
+                    </ul>
+                  </li>
+                {% endif %}
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+              {% endif %}
+            </ul>
+
+            <a
+              href="#"
+              class="burger light me-auto float-end mt-1 site-menu-toggle js-menu-toggle d-inline-block d-lg-none"
+              data-toggle="collapse"
+              data-target="#main-navbar"
+            >
+              <span></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div
+      class="hero"
+      style="background-image: url('/images/hero_bg_1.jpg')"
+    >
+      <div class="container">
+        <div class="row justify-content-center align-items-center">
+          <div class="col-lg-9 text-center mt-5">
+            <h1 class="heading" data-aos="fade-up">Manage Inquiries</h1>
+
+            <nav
+              aria-label="breadcrumb"
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
+              <ol class="breadcrumb text-center justify-content-center">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Admin</a></li>
+                <li
+                  class="breadcrumb-item active text-white-50"
+                  aria-current="page"
+                >
+                  Inquiries
+                </li>
+              </ol>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h3 class="mb-0">All Property Inquiries</h3>
+              <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary btn-sm">Export CSV</button>
+                <button type="button" class="btn btn-outline-success btn-sm">Mark All Responded</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% if inquiries.items %}
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>ID</th>
+                      <th>Property</th>
+                      <th>User</th>
+                      <th>Message</th>
+                      <th>Contact</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for inquiry in inquiries.items %}
+                    <tr>
+                      <td>{{ inquiry.id }}</td>
+                      <td>
+                        <a href="{{ url_for('property_detail', property_id=inquiry.property.id) }}">
+                          {{ inquiry.property.title }}
+                        </a>
+                        <br>
+                        <small class="text-muted">KSh {{ "{:,.0f}".format(inquiry.property.price * 130) }}</small>
+                      </td>
+                      <td>
+                        {{ inquiry.user.username }}
+                        <br>
+                        <small class="text-muted">{{ inquiry.user.email }}</small>
+                      </td>
+                      <td>
+                        <span class="d-inline-block text-truncate" style="max-width: 200px;">
+                          {{ inquiry.message }}
+                        </span>
+                      </td>
+                      <td>
+                        {% if inquiry.contact_phone %}
+                          {{ inquiry.contact_phone }}
+                        {% else %}
+                          <span class="text-muted">No phone</span>
+                        {% endif %}
+                        <br>
+                        <small class="text-muted">{{ inquiry.preferred_contact.title() }}</small>
+                      </td>
+                      <td>
+                        <span class="badge bg-{{ 'success' if inquiry.status == 'responded' else 'warning' }}">
+                          {{ inquiry.status.title() }}
+                        </span>
+                      </td>
+                      <td>{{ inquiry.created_at.strftime('%b %d, %Y') }}</td>
+                      <td>
+                        <div class="btn-group" role="group">
+                          <button type="button" class="btn btn-sm btn-outline-primary">Reply</button>
+                          {% if inquiry.status == 'pending' %}
+                            <button type="button" class="btn btn-sm btn-outline-success">Mark Responded</button>
+                          {% endif %}
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          {% if inquiries.pages > 1 %}
+          <div class="row">
+            <div class="col-lg-12">
+              <nav aria-label="Inquiries pagination">
+                <ul class="pagination justify-content-center">
+                  {% if inquiries.has_prev %}
+                    <li class="page-item">
+                      <a class="page-link" href="{{ url_for('admin_inquiries', page=inquiries.prev_num) }}">Previous</a>
+                    </li>
+                  {% endif %}
+                  
+                  {% for page_num in inquiries.iter_pages() %}
+                    {% if page_num %}
+                      {% if page_num != inquiries.page %}
+                        <li class="page-item">
+                          <a class="page-link" href="{{ url_for('admin_inquiries', page=page_num) }}">{{ page_num }}</a>
+                        </li>
+                      {% else %}
+                        <li class="page-item active">
+                          <span class="page-link">{{ page_num }}</span>
+                        </li>
+                      {% endif %}
+                    {% else %}
+                      <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                  
+                  {% if inquiries.has_next %}
+                    <li class="page-item">
+                      <a class="page-link" href="{{ url_for('admin_inquiries', page=inquiries.next_num) }}">Next</a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </nav>
+            </div>
+          </div>
+          {% endif %}
+
+        {% else %}
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="text-center py-5">
+                <div class="mb-4">
+                  <i class="fas fa-envelope fa-3x text-muted"></i>
+                </div>
+                <h4 class="text-muted mb-3">No Inquiries Found</h4>
+                <p class="text-muted mb-4">There are no property inquiries yet. Users will start inquiring about properties soon!</p>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="text-center">
+              <p class="mb-0">
+                Copyright &copy;
+                <script>
+                  document.write(new Date().getFullYear());
+                </script>
+                All rights reserved | Property
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <div id="overlayer"></div>
+    <div class="loader">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/tiny-slider.js"></script>
+    <script src="/js/aos.js"></script>
+    <script src="/js/navbar.js"></script>
+    <script src="/js/counter.js"></script>
+    <script src="/js/custom.js"></script>
+    
+    <!-- Reply Modal -->
+    <div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="replyModalLabel">Reply to Inquiry</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="replyForm">
+              <input type="hidden" id="inquiryId" name="inquiry_id">
+              <div class="mb-3">
+                <label for="recipientEmail" class="form-label">To:</label>
+                <input type="email" class="form-control" id="recipientEmail" readonly>
+              </div>
+              <div class="mb-3">
+                <label for="replySubject" class="form-label">Subject:</label>
+                <input type="text" class="form-control" id="replySubject" value="Re: Your Property Inquiry" readonly>
+              </div>
+              <div class="mb-3">
+                <label for="replyMessage" class="form-label">Message:</label>
+                <textarea class="form-control" id="replyMessage" rows="5" required placeholder="Type your reply here..."></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="sendReply">Send Reply</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const replyModal = new bootstrap.Modal(document.getElementById('replyModal'));
+        
+        // Add click handlers to all Reply buttons
+        document.querySelectorAll('button').forEach(button => {
+          if (button.textContent.trim() === 'Reply') {
+            button.addEventListener('click', function() {
+              const row = this.closest('tr');
+              const inquiryId = row.querySelector('td:first-child').textContent;
+              const userEmail = row.querySelector('td:nth-child(3) small').textContent;
+              
+              document.getElementById('inquiryId').value = inquiryId;
+              document.getElementById('recipientEmail').value = userEmail;
+              document.getElementById('replyMessage').value = '';
+              
+              replyModal.show();
+            });
+          }
+        });
+        
+        // Handle Mark Responded button clicks
+        document.querySelectorAll('button').forEach(button => {
+          if (button.textContent.trim() === 'Mark Responded') {
+            button.addEventListener('click', function() {
+              const row = this.closest('tr');
+              const inquiryId = row.querySelector('td:first-child').textContent;
+              
+              if (confirm('Mark this inquiry as responded?')) {
+                fetch(`/admin/inquiries/${inquiryId}/mark-responded`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrf_token')
+                  }
+                })
+                .then(response => response.json())
+                .then(data => {
+                  if (data.success) {
+                    location.reload();
+                  } else {
+                    alert('Error: ' + data.message);
+                  }
+                })
+                .catch(error => {
+                  console.error('Error:', error);
+                  alert('An error occurred while updating the inquiry status.');
+                });
+              }
+            });
+          }
+        });
+        
+        // Handle Send Reply button
+        document.getElementById('sendReply').addEventListener('click', function() {
+          const inquiryId = document.getElementById('inquiryId').value;
+          const message = document.getElementById('replyMessage').value;
+          
+          if (!message.trim()) {
+            alert('Please enter a reply message.');
+            return;
+          }
+          
+          fetch(`/admin/inquiries/${inquiryId}/reply`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrf_token')
+            },
+            body: JSON.stringify({
+              message: message
+            })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              alert('Reply sent successfully!');
+              replyModal.hide();
+              location.reload();
+            } else {
+              alert('Error: ' + data.message);
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while sending the reply.');
+          });
+        });
+        
+        // Helper function to get CSRF token
+        function getCookie(name) {
+          let cookieValue = null;
+          if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+              }
+            }
+          }
+          return cookieValue;
+        }
+      });
+    </script>
+  </body>
+</html>

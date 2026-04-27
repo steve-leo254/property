@@ -140,7 +140,7 @@
                     {% endif %}
                   </a>
                   <div class="property-content">
-                    <div class="price mb-2"><span>${{ "%.2f"|format(property.price) }}</span></div>
+                    <div class="price mb-2"><span>KSh {{ "{:,.0f}".format(property.price * 130) }}</span></div>
                     <div>
                       <span class="d-block mb-2 text-black-50">{{ property.listing_type.value.replace('_', ' ').title() }}</span>
                       <h3><a href="{{ url_for('property_detail', property_id=property.id) }}">{{ property.title }}</a></h3>
@@ -164,7 +164,7 @@
                     </div>
                     <div class="mb-4">
                       <div class="d-flex justify-content-between">
-                        <a href="{{ url_for('user_edit_property', property_id=property.id) }}" class="btn btn-primary">Edit</a>
+                        <a href="{{ url_for('edit_property', property_id=property.id) }}" class="btn btn-primary">Edit</a>
                         <a href="#" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this property?')">Delete</a>
                       </div>
                     </div>

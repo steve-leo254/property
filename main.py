@@ -140,6 +140,14 @@ def property_detail(property_id):
     property.views_count += 1
     db.session.commit()
     
+    # Parse image gallery
+    image_gallery = []
+    if property.image_gallery:
+        try:
+            image_gallery = json.loads(property.image_gallery)
+        except:
+            image_gallery = []
+    
     # Get similar properties
     similar_properties = Property.query.filter(
         Property.property_type_id == property.property_type_id,
@@ -149,7 +157,8 @@ def property_detail(property_id):
     
     return render_template('property-detail.html', 
                          property=property, 
-                         similar_properties=similar_properties)
+                         similar_properties=similar_properties,
+                         image_gallery=image_gallery)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -354,8 +363,7 @@ def admin_edit_property(property_id):
     
     # Populate choices
     form.property_type_id.choices = [(pt.id, pt.name) for pt in PropertyType.query.all()]
-    form.location_id.choices = [(l.id, f"{l.city}, {l.state}") for l in Location.query.all()]
-    
+        
     if form.validate_on_submit():
         # Handle main image upload
         if 'main_image' in request.files:
@@ -366,13 +374,38 @@ def admin_edit_property(property_id):
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 property.main_image = filename
         
+        # Handle additional images upload
+        if 'image_gallery' in request.files:
+            files = request.files.getlist('image_gallery')
+            new_gallery = []
+            
+            # Get existing gallery
+            existing_gallery = []
+            if property.image_gallery:
+                try:
+                    existing_gallery = json.loads(property.image_gallery)
+                except:
+                    existing_gallery = []
+            
+            # Add new images
+            for file in files:
+                if file and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S_')}_{filename}"
+                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                    new_gallery.append(filename)
+            
+            # Combine existing and new images
+            updated_gallery = existing_gallery + new_gallery
+            property.image_gallery = json.dumps(updated_gallery) if updated_gallery else None
+        
         # Update property
         property.title = form.title.data
         property.description = form.description.data
         property.price = form.price.data
         property.address = form.address.data
         property.property_type_id = form.property_type_id.data
-        property.location_id = form.location_id.data
+        property.location_text = form.location.data
         property.listing_type = ListingType(form.listing_type.data)
         property.square_feet = form.square_feet.data
         property.bedrooms = form.bedrooms.data
@@ -384,18 +417,29 @@ def admin_edit_property(property_id):
         flash('Property updated successfully!', 'success')
         return redirect(url_for('admin_dashboard'))
     
-    return render_template('admin/edit_property.html', form=form, property=property)
+    # Parse existing image gallery for display
+    image_gallery = []
+    if property.image_gallery:
+        try:
+            image_gallery = json.loads(property.image_gallery)
+        except:
+            image_gallery = []
+    
+    return render_template('admin/edit_property.html', form=form, property=property, image_gallery=image_gallery)
 
 # User Routes
 @app.route('/user/dashboard')
 @login_required
 def user_dashboard():
     """User dashboard"""
-    # Get user's properties
-    my_properties = Property.query.filter_by(owner_id=current_user.id).all()
+    # Get user's properties with pagination (show 5 per page for dashboard)
+    page = request.args.get('page', 1, type=int)
+    my_properties = Property.query.filter_by(owner_id=current_user.id).order_by(Property.created_at.desc()).paginate(
+        page=page, per_page=5, error_out=False
+    )
     
     # Get user's inquiries
-    my_inquiries = Inquiry.query.filter_by(user_id=current_user.id).all()
+    my_inquiries = Inquiry.query.filter_by(user_id=current_user.id).order_by(Inquiry.created_at.desc()).all()
     
     # For now, saved properties will be empty (we can implement this later)
     saved_properties = []
@@ -479,8 +523,7 @@ def edit_property(property_id):
     
     # Populate choices
     form.property_type_id.choices = [(pt.id, pt.name) for pt in PropertyType.query.all()]
-    form.location_id.choices = [(l.id, f"{l.city}, {l.state}") for l in Location.query.all()]
-    
+        
     if form.validate_on_submit():
         # Handle main image upload
         if 'main_image' in request.files:
@@ -497,7 +540,7 @@ def edit_property(property_id):
         property.price = form.price.data
         property.address = form.address.data
         property.property_type_id = form.property_type_id.data
-        property.location_id = form.location_id.data
+        property.location_text = form.location.data
         property.listing_type = ListingType(form.listing_type.data)
         property.square_feet = form.square_feet.data
         property.bedrooms = form.bedrooms.data
@@ -506,7 +549,6 @@ def edit_property(property_id):
         property.year_built = form.year_built.data
         
         db.session.commit()
-        flash('Property updated successfully!', 'success')
         return redirect(url_for('user_properties'))
     
     return render_template('user/edit_property.html', form=form, property=property)
@@ -518,13 +560,12 @@ def add_property():
     if current_user.role not in [UserRole.AGENT, UserRole.ADMIN]:
         flash('Only agents and admins can add properties.', 'danger')
         return redirect(url_for('property_list'))
-    """Add new property"""
+    
     form = PropertyForm()
     
     # Populate choices
     form.property_type_id.choices = [(pt.id, pt.name) for pt in PropertyType.query.all()]
-    form.location_id.choices = [(l.id, f"{l.city}, {l.state}") for l in Location.query.all()]
-    
+        
     if form.validate_on_submit():
         # Handle main image upload
         main_image = None
@@ -536,6 +577,17 @@ def add_property():
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 main_image = filename
         
+        # Handle additional images upload
+        image_gallery = []
+        if 'image_gallery' in request.files:
+            files = request.files.getlist('image_gallery')
+            for file in files:
+                if file and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S_')}_{filename}"
+                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                    image_gallery.append(filename)
+        
         # Create property
         property = Property(
             title=form.title.data,
@@ -544,14 +596,15 @@ def add_property():
             address=form.address.data,
             owner_id=current_user.id,
             property_type_id=form.property_type_id.data,
-            location_id=form.location_id.data,
+            location_text=form.location.data,
             listing_type=ListingType(form.listing_type.data),
             square_feet=form.square_feet.data,
             bedrooms=form.bedrooms.data,
             bathrooms=form.bathrooms.data,
             garages=form.garages.data,
             year_built=form.year_built.data,
-            main_image=main_image
+            main_image=main_image,
+            image_gallery=json.dumps(image_gallery) if image_gallery else None
         )
         
         db.session.add(property)
@@ -777,6 +830,65 @@ def admin_setup():
         return redirect(url_for('login'))
     
     return render_template('admin/setup.html', form=form)
+
+# Admin Inquiry Management Routes
+@app.route('/admin/inquiries/<int:inquiry_id>/reply', methods=['POST'])
+@login_required
+def admin_reply_inquiry(inquiry_id):
+    """Handle reply to inquiry"""
+    if current_user.role != UserRole.ADMIN:
+        return jsonify({'success': False, 'message': 'Access denied'}), 403
+    
+    inquiry = Inquiry.query.get_or_404(inquiry_id)
+    
+    try:
+        data = request.get_json()
+        reply_message = data.get('message', '')
+        
+        if not reply_message.strip():
+            return jsonify({'success': False, 'message': 'Message cannot be empty'}), 400
+        
+        # Here you would normally send an email
+        # For now, we'll just mark as responded and save the reply
+        inquiry.status = 'responded'
+        inquiry.admin_reply = reply_message
+        inquiry.responded_at = datetime.utcnow()
+        inquiry.responded_by = current_user.id
+        
+        db.session.commit()
+        
+        # TODO: Add actual email sending functionality
+        # send_email(
+        #     to=inquiry.user.email,
+        #     subject='Re: Your Property Inquiry',
+        #     body=reply_message
+        # )
+        
+        return jsonify({'success': True, 'message': 'Reply sent successfully'})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/admin/inquiries/<int:inquiry_id>/mark-responded', methods=['POST'])
+@login_required
+def admin_mark_inquiry_responded(inquiry_id):
+    """Mark inquiry as responded"""
+    if current_user.role != UserRole.ADMIN:
+        return jsonify({'success': False, 'message': 'Access denied'}), 403
+    
+    inquiry = Inquiry.query.get_or_404(inquiry_id)
+    
+    try:
+        inquiry.status = 'responded'
+        inquiry.responded_at = datetime.utcnow()
+        inquiry.responded_by = current_user.id
+        
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'Inquiry marked as responded'})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 if __name__ == '__main__':
     with app.app_context():

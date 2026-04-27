@@ -172,7 +172,7 @@
                         {% for property in recent_properties %}
                         <tr>
                           <td>{{ property.title }}</td>
-                          <td>${{ "%.2f"|format(property.price) }}</td>
+                          <td>KSh {{ "{:,.0f}".format(property.price * 130) }}</td>
                           <td>{{ property.property_type_obj.name }}</td>
                           <td>
                             <span class="badge bg-{{ 'success' if property.status.value == 'AVAILABLE' else 'warning' }}">

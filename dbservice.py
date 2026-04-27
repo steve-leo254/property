@@ -77,7 +77,8 @@ class User(db.Model):
     
     # Relationships
     properties = db.relationship('Property', backref='owner', lazy=True)
-    inquiries = db.relationship('Inquiry', backref='user', lazy=True)
+    inquiries = db.relationship('Inquiry', foreign_keys='Inquiry.user_id', backref='user', lazy=True)
+    responded_inquiries = db.relationship('Inquiry', foreign_keys='Inquiry.responded_by', backref='responder', lazy=True)
 
     def set_password(self, password):
         self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -163,7 +164,8 @@ class Property(db.Model):
     owner_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     agent_id = db.Column(db.Integer, db.ForeignKey('agents.id'))
     property_type_id = db.Column(db.Integer, db.ForeignKey('property_types.id'), nullable=False)
-    location_id = db.Column(db.Integer, db.ForeignKey('locations.id'), nullable=False)
+    location_id = db.Column(db.Integer, db.ForeignKey('locations.id'), nullable=True)
+    location_text = db.Column(db.String(200), nullable=False)
     
     # Property Details
     listing_type = db.Column(db.Enum(ListingType), nullable=False)
@@ -206,6 +208,9 @@ class Inquiry(db.Model):
     contact_phone = db.Column(db.String(20))
     preferred_contact = db.Column(db.String(20), default='email')
     status = db.Column(db.String(20), default='pending')  # pending, responded, closed
+    admin_reply = db.Column(db.Text)  # Admin's reply message
+    responded_at = db.Column(db.DateTime)  # When inquiry was responded to
+    responded_by = db.Column(db.Integer, db.ForeignKey('users.id'))  # Admin who responded
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 # WTForms Classes
@@ -241,7 +246,7 @@ class PropertyForm(FlaskForm):
     price = FloatField('Price', validators=[DataRequired(), NumberRange(min=0)])
     address = StringField('Address', validators=[DataRequired()])
     property_type_id = SelectField('Property Type', coerce=int, validators=[DataRequired()])
-    location_id = SelectField('Location', coerce=int, validators=[DataRequired()])
+    location = StringField('Location', validators=[DataRequired()])
     listing_type = SelectField('Listing Type', 
                              choices=[('FOR_SALE', 'For Sale'), ('FOR_RENT', 'For Rent')],
                              validators=[DataRequired()])

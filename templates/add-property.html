@@ -187,11 +187,11 @@
                   </div>
                   <div class="col-md-6">
                     <div class="form-group">
-                      {{ form.location_id.label(class="form-label") }}
-                      {{ form.location_id(class="form-control") }}
-                      {% if form.location_id.errors %}
+                      {{ form.location.label(class="form-label") }}
+                      {{ form.location(class="form-control") }}
+                      {% if form.location.errors %}
                         <div class="text-danger">
-                          {% for error in form.location_id.errors %}
+                          {% for error in form.location.errors %}
                             <small>{{ error }}</small>
                           {% endfor %}
                         </div>
@@ -287,9 +287,20 @@
                 <div class="row">
                   <div class="col-12">
                     <div class="form-group">
-                      <label for="main_image" class="form-label">Property Image</label>
-                      <input type="file" name="main_image" id="main_image" class="form-control" accept="image/*">
-                      <small class="text-muted">Upload a main image for the property (PNG, JPG, JPEG, GIF - Max 16MB)</small>
+                      <label for="main_image" class="form-label">Main Property Image</label>
+                      <input type="file" name="main_image" id="main_image" class="form-control" accept="image/*" required>
+                      <small class="text-muted">Upload the main image for the property (PNG, JPG, JPEG, GIF - Max 16MB)</small>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-12">
+                    <div class="form-group">
+                      <label for="image_gallery" class="form-label">Additional Images</label>
+                      <input type="file" name="image_gallery" id="image_gallery" class="form-control" accept="image/*" multiple>
+                      <small class="text-muted">Upload additional property images (PNG, JPG, JPEG, GIF - Max 16MB each). Hold Ctrl/Cmd to select multiple images.</small>
+                      <div id="image_preview" class="mt-3"></div>
                     </div>
                   </div>
                 </div>
@@ -345,5 +356,91 @@
     </div>
 
     <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/counties.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const locationInput = document.querySelector('input[name="location"]');
+            if (locationInput && countiesData) {
+                // Convert to datalist for autocomplete
+                const datalist = document.createElement('datalist');
+                datalist.id = 'location-suggestions';
+                
+                // Add Kenya counties and towns
+                const kenyaCities = countiesData.Kenya;
+                kenyaCities.forEach(cityData => {
+                    // Add city
+                    const cityOption = document.createElement('option');
+                    cityOption.value = cityData.city;
+                    datalist.appendChild(cityOption);
+                    
+                    // Add towns
+                    cityData.towns.forEach(town => {
+                        const townOption = document.createElement('option');
+                        townOption.value = `${cityData.city} - ${town}`;
+                        datalist.appendChild(townOption);
+                    });
+                });
+                
+                locationInput.setAttribute('list', 'location-suggestions');
+                locationInput.parentNode.appendChild(datalist);
+            }
+            
+            // Image preview functionality
+            const imageGalleryInput = document.getElementById('image_gallery');
+            const imagePreview = document.getElementById('image_preview');
+            
+            if (imageGalleryInput && imagePreview) {
+                imageGalleryInput.addEventListener('change', function() {
+                    imagePreview.innerHTML = '';
+                    
+                    if (this.files.length > 0) {
+                        const previewTitle = document.createElement('h6');
+                        previewTitle.textContent = 'Image Preview:';
+                        previewTitle.className = 'mb-3';
+                        imagePreview.appendChild(previewTitle);
+                        
+                        const previewRow = document.createElement('div');
+                        previewRow.className = 'row';
+                        
+                        Array.from(this.files).forEach((file, index) => {
+                            if (file.type.startsWith('image/')) {
+                                const col = document.createElement('div');
+                                col.className = 'col-md-3 col-sm-6 mb-3';
+                                
+                                const card = document.createElement('div');
+                                card.className = 'card';
+                                
+                                const img = document.createElement('img');
+                                img.src = URL.createObjectURL(file);
+                                img.className = 'card-img-top';
+                                img.style.height = '150px';
+                                img.style.objectFit = 'cover';
+                                
+                                const cardBody = document.createElement('div');
+                                cardBody.className = 'card-body p-2';
+                                
+                                const cardText = document.createElement('small');
+                                cardText.className = 'text-truncate d-block';
+                                cardText.textContent = file.name;
+                                
+                                const fileSize = document.createElement('small');
+                                fileSize.className = 'text-muted';
+                                fileSize.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+                                
+                                cardBody.appendChild(cardText);
+                                cardBody.appendChild(fileSize);
+                                card.appendChild(img);
+                                card.appendChild(cardBody);
+                                col.appendChild(card);
+                                previewRow.appendChild(col);
+                            }
+                        });
+                        
+                        imagePreview.appendChild(previewRow);
+                    }
+                });
+            }
+        });
+    </script>
   </body>
 </html>

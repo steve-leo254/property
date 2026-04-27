@@ -1,0 +1,259 @@
+<!-- /*
+* Template Name: Property
+* Template Author: flowtech
+* Template URI: https://flowtech/
+* License: https://creativecommons.org/licenses/by/3.0/
+*/ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="flowtech" />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    <meta name="description" content="" />
+    <meta name="keywords" content="bootstrap, bootstrap5" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+
+    <title>My Inquiries - Property</title>
+  </head>
+  <body>
+    <div class="site-mobile-menu site-navbar-target">
+      <div class="site-mobile-menu-header">
+        <div class="site-mobile-menu-close">
+          <span class="icofont-close js-menu-toggle"></span>
+        </div>
+      </div>
+      <div class="site-mobile-menu-body"></div>
+    </div>
+
+    <nav class="site-nav">
+      <div class="container">
+        <div class="menu-bg-wrap">
+          <div class="site-navigation">
+            <a href="{{ url_for('index') }}" class="logo m-0 float-start">Property</a>
+
+            <ul
+              class="js-clone-nav d-none d-lg-inline-block text-start site-menu float-end"
+            >
+              <li><a href="{{ url_for('index') }}">Home</a></li>
+              <li><a href="{{ url_for('property_list') }}">Properties</a></li>
+              <li><a href="{{ url_for('about') }}">About</a></li>
+              <li><a href="{{ url_for('property_agents') }}">Agents</a></li>
+              <li class="has-children">
+                <a href="#">{{ current_user.username }}</a>
+                <ul class="dropdown">
+                  <li><a href="{{ url_for('user_dashboard') }}">My Dashboard</a></li>
+                  <li><a href="{{ url_for('user_profile') }}">My Profile</a></li>
+                  <li><a href="{{ url_for('user_properties') }}">My Properties</a></li>
+                  <li class="active"><a href="{{ url_for('user_inquiries') }}">My Inquiries</a></li>
+                  <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                </ul>
+              </li>
+            </ul>
+
+            <a
+              href="#"
+              class="burger light me-auto float-end mt-1 site-menu-toggle js-menu-toggle d-inline-block d-lg-none"
+              data-toggle="collapse"
+              data-target="#main-navbar"
+            >
+              <span></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div
+      class="hero"
+      style="background-image: url('/images/hero_bg_1.jpg')"
+    >
+      <div class="container">
+        <div class="row justify-content-center align-items-center">
+          <div class="col-lg-9 text-center mt-5">
+            <h1 class="heading" data-aos="fade-up">My Inquiries</h1>
+
+            <nav
+              aria-label="breadcrumb"
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
+              <ol class="breadcrumb text-center justify-content-center">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('user_dashboard') }}">Dashboard</a></li>
+                <li
+                  class="breadcrumb-item active text-white-50"
+                  aria-current="page"
+                >
+                  Inquiries
+                </li>
+              </ol>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h3 class="mb-0">My Property Inquiries</h3>
+              <a href="{{ url_for('property_list') }}" class="btn btn-outline-primary">Browse Properties</a>
+            </div>
+          </div>
+        </div>
+
+        {% if inquiries.items %}
+          <div class="row">
+            {% for inquiry in inquiries.items %}
+            <div class="col-lg-12 mb-4">
+              <div class="card">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-8">
+                      <h5 class="card-title">
+                        <a href="{{ url_for('property_detail', property_id=inquiry.property.id) }}">
+                          {{ inquiry.property.title }}
+                        </a>
+                      </h5>
+                      <p class="text-muted mb-2">
+                        <i class="fas fa-map-marker-alt me-2"></i>{{ inquiry.property.address }}
+                      </p>
+                      <p class="card-text">{{ inquiry.message }}</p>
+                      <div class="d-flex align-items-center">
+                        <span class="badge bg-{{ 'success' if inquiry.status == 'responded' else 'warning' }} me-2">
+                          {{ inquiry.status.title() }}
+                        </span>
+                        <small class="text-muted">
+                          <i class="far fa-clock me-1"></i>
+                          {{ inquiry.created_at.strftime('%B %d, %Y') }}
+                        </small>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="text-end">
+                        <h4 class="text-primary mb-2">KSh {{ "{:,.0f}".format(inquiry.property.price * 130) }}</h4>
+                        <div class="specs d-flex justify-content-end mb-3">
+                          <span class="d-block d-flex align-items-center me-3">
+                            <span class="icon-bed me-1"></span>
+                            <small>{{ inquiry.property.bedrooms }}</small>
+                          </span>
+                          <span class="d-block d-flex align-items-center">
+                            <span class="icon-bath me-1"></span>
+                            <small>{{ inquiry.property.bathrooms }}</small>
+                          </span>
+                        </div>
+                        <a href="{{ url_for('property_detail', property_id=inquiry.property.id) }}" class="btn btn-sm btn-outline-primary">View Property</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- Pagination -->
+          {% if inquiries.pages > 1 %}
+          <div class="row">
+            <div class="col-lg-12">
+              <nav aria-label="Inquiries pagination">
+                <ul class="pagination justify-content-center">
+                  {% if inquiries.has_prev %}
+                    <li class="page-item">
+                      <a class="page-link" href="{{ url_for('user_inquiries', page=inquiries.prev_num) }}">Previous</a>
+                    </li>
+                  {% endif %}
+                  
+                  {% for page_num in inquiries.iter_pages() %}
+                    {% if page_num %}
+                      {% if page_num != inquiries.page %}
+                        <li class="page-item">
+                          <a class="page-link" href="{{ url_for('user_inquiries', page=page_num) }}">{{ page_num }}</a>
+                        </li>
+                      {% else %}
+                        <li class="page-item active">
+                          <span class="page-link">{{ page_num }}</span>
+                        </li>
+                      {% endif %}
+                    {% else %}
+                      <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                  
+                  {% if inquiries.has_next %}
+                    <li class="page-item">
+                      <a class="page-link" href="{{ url_for('user_inquiries', page=inquiries.next_num) }}">Next</a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </nav>
+            </div>
+          </div>
+          {% endif %}
+
+        {% else %}
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="text-center py-5">
+                <div class="mb-4">
+                  <i class="fas fa-envelope-open-text fa-3x text-muted"></i>
+                </div>
+                <h4 class="text-muted mb-3">No Inquiries Yet</h4>
+                <p class="text-muted mb-4">You haven't made any property inquiries yet. Start exploring properties and make your first inquiry!</p>
+                <a href="{{ url_for('property_list') }}" class="btn btn-primary">Browse Properties</a>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="text-center">
+              <p class="mb-0">
+                Copyright &copy;
+                <script>
+                  document.write(new Date().getFullYear());
+                </script>
+                All rights reserved | Property
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <div id="overlayer"></div>
+    <div class="loader">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/tiny-slider.js"></script>
+    <script src="/js/aos.js"></script>
+    <script src="/js/navbar.js"></script>
+    <script src="/js/counter.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>

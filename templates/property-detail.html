@@ -89,13 +89,13 @@
 
     <div
       class="hero page-inner overlay"
-      style="background-image: url('images/hero_bg_3.jpg')"
+      style="background-image: url('/images/hero_bg_3.jpg')"
     >
       <div class="container">
         <div class="row justify-content-center align-items-center">
           <div class="col-lg-9 text-center mt-5">
             <h1 class="heading" data-aos="fade-up">
-              5232 California AVE. 21BC
+              {{ property.title }}
             </h1>
 
             <nav
@@ -112,7 +112,7 @@
                   class="breadcrumb-item active text-white-50"
                   aria-current="page"
                 >
-                  5232 California AVE. 21BC
+                  {{ property.title }}
                 </li>
               </ol>
             </nav>
@@ -127,25 +127,31 @@
           <div class="col-lg-7">
             <div class="img-property-slide-wrap">
               <div class="img-property-slide">
-                <img src="/images/img_1.jpg" alt="Image" class="img-fluid" />
-                <img src="/images/img_2.jpg" alt="Image" class="img-fluid" />
-                <img src="/images/img_3.jpg" alt="Image" class="img-fluid" />
+                <!-- Main Image -->
+                {% if property.main_image %}
+                  <img src="/static/uploads/{{ property.main_image }}" alt="{{ property.title }}" class="img-fluid" />
+                {% else %}
+                  <img src="/images/img_1.jpg" alt="Default property image" class="img-fluid" />
+                {% endif %}
+                
+                <!-- Gallery Images -->
+                {% for image in image_gallery %}
+                  <img src="/static/uploads/{{ image }}" alt="{{ property.title }} - Image {{ loop.index }}" class="img-fluid" />
+                {% endfor %}
+                
+                <!-- Fallback images if no gallery -->
+                {% if not image_gallery %}
+                  <img src="/images/img_2.jpg" alt="Property image 2" class="img-fluid" />
+                  <img src="/images/img_3.jpg" alt="Property image 3" class="img-fluid" />
+                {% endif %}
               </div>
             </div>
           </div>
           <div class="col-lg-4">
-            <h2 class="heading text-primary">5232 California Ave. 21BC</h2>
-            <p class="meta">California, United States</p>
+            <h2 class="heading text-primary">{{ property.title }}</h2>
+            <p class="meta">{{ property.location_obj.city }}, {{ property.location_obj.state }}</p>
             <p class="text-black-50">
-              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ratione
-              laborum quo quos omnis sed magnam id, ducimus saepe, debitis error
-              earum, iste dicta odio est sint dolorem magni animi tenetur.
-            </p>
-            <p class="text-black-50">
-              Perferendis eligendi reprehenderit, assumenda molestias nisi eius
-              iste reiciendis porro tenetur in, repudiandae amet libero.
-              Doloremque, reprehenderit cupiditate error laudantium qui, esse
-              quam debitis, eum cumque perferendis, illum harum expedita.
+              {{ property.description }}
             </p>
 
             <div class="d-block agent-box p-5">
@@ -180,6 +186,128 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section section-properties">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8">
+            <div class="property-details">
+              <h3 class="mb-4">Property Details</h3>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <strong>Price:</strong> KSh {{ "{:,.0f}".format(property.price * 130) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                  <strong>Address:</strong> {{ property.address }}
+                </div>
+                <div class="col-md-6 mb-3">
+                  <strong>Type:</strong> {{ property.property_type_obj.name }}
+                </div>
+                <div class="col-md-6 mb-3">
+                  <strong>Listing Type:</strong> {{ property.listing_type.value.replace('_', ' ').title() }}
+                </div>
+                <div class="col-md-6 mb-3">
+                  <strong>Square Feet:</strong> {{ property.square_feet }} sq ft
+                </div>
+                <div class="col-md-6 mb-3">
+                  <strong>Year Built:</strong> {{ property.year_built }}
+                </div>
+                <div class="col-md-6 mb-3">
+                  <strong>Bedrooms:</strong> {{ property.bedrooms }}
+                </div>
+                <div class="col-md-6 mb-3">
+                  <strong>Bathrooms:</strong> {{ property.bathrooms }}
+                </div>
+                <div class="col-md-6 mb-3">
+                  <strong>Garages:</strong> {{ property.garages }}
+                </div>
+                <div class="col-md-6 mb-3">
+                  <strong>Location:</strong> {{ property.location_obj.city }}, {{ property.location_obj.state }}, {{ property.location_obj.country }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="property-price-box">
+              <h3 class="mb-3">KSh {{ "{:,.0f}".format(property.price * 130) }}</h3>
+              <p class="text-muted">{{ property.listing_type.value.replace('_', ' ').title() }}</p>
+              <div class="specs d-flex mb-4">
+                <span class="d-block d-flex align-items-center me-3">
+                  <span class="icon-bed me-2"></span>
+                  <span class="caption">{{ property.bedrooms }} beds</span>
+                </span>
+                <span class="d-block d-flex align-items-center">
+                  <span class="icon-bath me-2"></span>
+                  <span class="caption">{{ property.bathrooms }} baths</span>
+                </span>
+              </div>
+              <div class="d-grid">
+                <a href="{{ url_for('property_list') }}" class="btn btn-outline-primary mb-2">Back to Properties</a>
+                {% if current_user.is_authenticated %}
+                  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#contactAgentModal">
+                    Contact Agent
+                  </button>
+                {% else %}
+                  <a href="{{ url_for('login') }}" class="btn btn-primary">Login to Contact</a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Agent Modal -->
+    <div class="modal fade" id="contactAgentModal" tabindex="-1" aria-labelledby="contactAgentModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="contactAgentModalLabel">Contact Agent - {{ property.title }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form method="POST" action="{{ url_for('submit_inquiry', property_id=property.id) }}">
+            <div class="modal-body">
+              {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                  {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                      {{ message }}
+                      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+              {% endwith %}
+              
+              <div class="mb-3">
+                <label for="message" class="form-label">Your Message</label>
+                <textarea class="form-control" id="message" name="message" rows="4" placeholder="I'm interested in this property. Please provide more information..." required></textarea>
+              </div>
+              
+              <div class="mb-3">
+                <label for="contact_phone" class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" id="contact_phone" name="contact_phone" placeholder="+254 XXX XXX XXX" value="{{ current_user.phone or '' }}">
+              </div>
+              
+              <div class="mb-3">
+                <label for="preferred_contact" class="form-label">Preferred Contact Method</label>
+                <select class="form-select" id="preferred_contact" name="preferred_contact">
+                  <option value="email">Email</option>
+                  <option value="phone">Phone</option>
+                </select>
+              </div>
+              
+              <div class="alert alert-info">
+                <small><i class="fas fa-info-circle me-2"></i>Your inquiry will be sent to our agents who will contact you shortly about this property.</small>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary">Send Inquiry</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

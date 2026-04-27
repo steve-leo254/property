@@ -126,6 +126,58 @@
 
     <div class="section">
       <div class="container">
+        <!-- Property Filters -->
+        <div class="row mb-5">
+          <div class="col-12">
+            <div class="bg-light p-4 rounded">
+              <h3 class="mb-4">Filter Properties</h3>
+              <form method="GET" action="{{ url_for('property_list') }}" class="row g-3">
+                <div class="col-md-3">
+                  <label for="property_type_id" class="form-label">Property Type</label>
+                  <select name="property_type_id" id="property_type_id" class="form-select">
+                    <option value="">All Types</option>
+                    {% for property_type in property_types %}
+                      <option value="{{ property_type.id }}" 
+                              {% if request.args.get('property_type_id')|int == property_type.id %}selected{% endif %}>
+                        {{ property_type.name }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                
+                <div class="col-md-3">
+                  <label for="listing_type" class="form-label">Listing Type</label>
+                  <select name="listing_type" id="listing_type" class="form-select">
+                    <option value="">All Listings</option>
+                    <option value="FOR_SALE" {% if request.args.get('listing_type') == 'FOR_SALE' %}selected{% endif %}>For Sale</option>
+                    <option value="FOR_RENT" {% if request.args.get('listing_type') == 'FOR_RENT' %}selected{% endif %}>For Rent</option>
+                  </select>
+                </div>
+                
+                <div class="col-md-2">
+                  <label for="min_price" class="form-label">Min Price</label>
+                  <input type="number" name="min_price" id="min_price" class="form-control" 
+                         placeholder="Min" value="{{ request.args.get('min_price', '') }}">
+                </div>
+                
+                <div class="col-md-2">
+                  <label for="max_price" class="form-label">Max Price</label>
+                  <input type="number" name="max_price" id="max_price" class="form-control" 
+                         placeholder="Max" value="{{ request.args.get('max_price', '') }}">
+                </div>
+                
+                <div class="col-md-2">
+                  <label class="form-label">&nbsp;</label>
+                  <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                    <a href="{{ url_for('property_list') }}" class="btn btn-outline-secondary">Clear</a>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        
         <div class="row mb-5 align-items-center">
           <div class="col-lg-6 text-center mx-auto">
             <h2 class="font-weight-bold text-primary heading">
@@ -149,10 +201,11 @@
                       </a>
 
                       <div class="property-content">
-                        <div class="price mb-2"><span>${{ "%.2f"|format(property.price) }}</span></div>
+                        <div class="price mb-2"><span>KSh {{ "{:,.0f}".format(property.price * 130) }}</span></div>
                         <div>
                           <span class="d-block mb-2 text-black-50">{{ property.address }}</span>
-                          <span class="city d-block mb-3">{{ property.location_obj.city }}, {{ property.location_obj.state }}</span>
+                          <span class="city d-block mb-3">{{ property.location_text or (property.location_obj.city + ', ' + property.location_obj.state) if property.location_obj else property.location_text }}</span>
+                          <span class="property-type d-block mb-2 text-primary fw-bold">{{ property.property_type_obj.name if property.property_type_obj else 'Property Type' }}</span>
 
                           <div class="specs d-flex mb-4">
                             <span class="d-block d-flex align-items-center me-3">
@@ -224,10 +277,11 @@
                   </a>
 
                   <div class="property-content">
-                    <div class="price mb-2"><span>${{ "%.2f"|format(property.price) }}</span></div>
+                    <div class="price mb-2"><span>KSh {{ "{:,.0f}".format(property.price * 130) }}</span></div>
                     <div>
                       <span class="d-block mb-2 text-black-50">{{ property.address }}</span>
-                      <span class="city d-block mb-3">{{ property.location_obj.city }}, {{ property.location_obj.state }}</span>
+                      <span class="city d-block mb-3">{{ property.location_text or (property.location_obj.city + ', ' + property.location_obj.state) if property.location_obj else property.location_text }}</span>
+                      <span class="property-type d-block mb-2 text-primary fw-bold">{{ property.property_type_obj.name if property.property_type_obj else 'Property Type' }}</span>
 
                       <div class="specs d-flex mb-4">
                         <span class="d-block d-flex align-items-center me-3">

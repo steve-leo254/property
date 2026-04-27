@@ -1,0 +1,262 @@
+<!-- /*
+* Template Name: Property
+* Template Author: flowtech
+* Template URI: https://flowtech/
+* License: https://creativecommons.org/licenses/by/3.0/
+*/ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="flowtech" />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    <meta name="description" content="" />
+    <meta name="keywords" content="bootstrap, bootstrap5" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+
+    <title>Manage Agents - Property</title>
+  </head>
+  <body>
+    <div class="site-mobile-menu site-navbar-target">
+      <div class="site-mobile-menu-header">
+        <div class="site-mobile-menu-close">
+          <span class="icofont-close js-menu-toggle"></span>
+        </div>
+      </div>
+      <div class="site-mobile-menu-body"></div>
+    </div>
+
+    <nav class="site-nav">
+      <div class="container">
+        <div class="menu-bg-wrap">
+          <div class="site-navigation">
+            <a href="{{ url_for('index') }}" class="logo m-0 float-start">Property</a>
+
+            <ul
+              class="js-clone-nav d-none d-lg-inline-block text-start site-menu float-end"
+            >
+              <li><a href="{{ url_for('index') }}">Home</a></li>
+              <li><a href="{{ url_for('property_list') }}">Properties</a></li>
+              <li><a href="{{ url_for('about') }}">About</a></li>
+              <li><a href="{{ url_for('property_agents') }}">Agents</a></li>
+              {% if current_user.is_authenticated %}
+                {% if current_user.role == 'ADMIN' %}
+                  <li class="has-children">
+                    <a href="#">Admin</a>
+                    <ul class="dropdown">
+                      <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+                      <li><a href="{{ url_for('admin_properties') }}">Properties</a></li>
+                      <li><a href="{{ url_for('admin_users') }}">Users</a></li>
+                      <li class="active"><a href="{{ url_for('admin_agents') }}">Agents</a></li>
+                      <li><a href="{{ url_for('admin_register') }}">Add Admin</a></li>
+                    </ul>
+                  </li>
+                {% endif %}
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+              {% endif %}
+            </ul>
+
+            <a
+              href="#"
+              class="burger light me-auto float-end mt-1 site-menu-toggle js-menu-toggle d-inline-block d-lg-none"
+              data-toggle="collapse"
+              data-target="#main-navbar"
+            >
+              <span></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div
+      class="hero"
+      style="background-image: url('/images/hero_bg_1.jpg')"
+    >
+      <div class="container">
+        <div class="row justify-content-center align-items-center">
+          <div class="col-lg-9 text-center mt-5">
+            <h1 class="heading" data-aos="fade-up">Manage Agents</h1>
+
+            <nav
+              aria-label="breadcrumb"
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
+              <ol class="breadcrumb text-center justify-content-center">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Admin</a></li>
+                <li
+                  class="breadcrumb-item active text-white-50"
+                  aria-current="page"
+                >
+                  Agents
+                </li>
+              </ol>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <h3 class="mb-4">All Real Estate Agents</h3>
+          </div>
+        </div>
+
+        {% if agents.items %}
+          <div class="row">
+            {% for agent in agents.items %}
+            <div class="col-lg-4 col-md-6 mb-4">
+              <div class="card agent-card h-100">
+                <div class="card-body text-center">
+                  <div class="mb-3">
+                    {% if agent.image %}
+                      <img src="/static/uploads/{{ agent.image }}" alt="{{ agent.name }}" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;">
+                    {% else %}
+                      <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" style="width: 100px; height: 100px; margin: 0 auto;">
+                        <span class="text-white h3">{{ agent.name[0] if agent.name else 'A' }}</span>
+                      </div>
+                    {% endif %}
+                  </div>
+                  <h5 class="card-title">{{ agent.name }}</h5>
+                  <p class="text-muted">{{ agent.title or 'Real Estate Agent' }}</p>
+                  <p class="card-text small">{{ agent.description or 'Experienced real estate professional dedicated to helping clients find their dream properties.' }}</p>
+                  
+                  <div class="agent-details text-start">
+                    {% if agent.email %}
+                    <p class="small mb-1">
+                      <i class="fas fa-envelope me-2"></i>{{ agent.email }}
+                    </p>
+                    {% endif %}
+                    {% if agent.phone %}
+                    <p class="small mb-1">
+                      <i class="fas fa-phone me-2"></i>{{ agent.phone }}
+                    </p>
+                    {% endif %}
+                    <p class="small mb-1">
+                      <i class="fas fa-star me-2 text-warning"></i>
+                      {% if agent.is_featured %}
+                        <span class="badge bg-success">Featured Agent</span>
+                      {% else %}
+                        <span class="text-muted">Standard Agent</span>
+                      {% endif %}
+                    </p>
+                  </div>
+                  
+                  <div class="mt-3">
+                    <div class="btn-group" role="group">
+                      <button class="btn btn-sm btn-outline-primary">Edit</button>
+                      <button class="btn btn-sm btn-outline-danger">Delete</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- Pagination -->
+          {% if agents.pages > 1 %}
+          <div class="row">
+            <div class="col-lg-12">
+              <nav aria-label="Agents pagination">
+                <ul class="pagination justify-content-center">
+                  {% if agents.has_prev %}
+                    <li class="page-item">
+                      <a class="page-link" href="{{ url_for('admin_agents', page=agents.prev_num) }}">Previous</a>
+                    </li>
+                  {% endif %}
+                  
+                  {% for page_num in agents.iter_pages() %}
+                    {% if page_num %}
+                      {% if page_num != agents.page %}
+                        <li class="page-item">
+                          <a class="page-link" href="{{ url_for('admin_agents', page=page_num) }}">{{ page_num }}</a>
+                        </li>
+                      {% else %}
+                        <li class="page-item active">
+                          <span class="page-link">{{ page_num }}</span>
+                        </li>
+                      {% endif %}
+                    {% else %}
+                      <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                  
+                  {% if agents.has_next %}
+                    <li class="page-item">
+                      <a class="page-link" href="{{ url_for('admin_agents', page=agents.next_num) }}">Next</a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </nav>
+            </div>
+          </div>
+          {% endif %}
+
+        {% else %}
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="text-center py-5">
+                <div class="mb-4">
+                  <i class="fas fa-user-tie fa-3x text-muted"></i>
+                </div>
+                <h4 class="text-muted mb-3">No Agents Found</h4>
+                <p class="text-muted mb-4">There are no agents registered in the system yet.</p>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="text-center">
+              <p class="mb-0">
+                Copyright &copy;
+                <script>
+                  document.write(new Date().getFullYear());
+                </script>
+                All rights reserved | Property
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <div id="overlayer"></div>
+    <div class="loader">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/tiny-slider.js"></script>
+    <script src="/js/aos.js"></script>
+    <script src="/js/navbar.js"></script>
+    <script src="/js/counter.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>

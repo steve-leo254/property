@@ -1,0 +1,276 @@
+<!-- /*
+* Template Name: Property
+* Template Author: flowtech
+* Template URI: https://flowtech/
+* License: https://creativecommons.org/licenses/by/3.0/
+*/ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="flowtech" />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    <meta name="description" content="" />
+    <meta name="keywords" content="bootstrap, bootstrap5" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+
+    <title>User Profile - Property</title>
+  </head>
+  <body>
+    <div class="site-mobile-menu site-navbar-target">
+      <div class="site-mobile-menu-header">
+        <div class="site-mobile-menu-close">
+          <span class="icofont-close js-menu-toggle"></span>
+        </div>
+      </div>
+      <div class="site-mobile-menu-body"></div>
+    </div>
+
+    <nav class="site-nav">
+      <div class="container">
+        <div class="menu-bg-wrap">
+          <div class="site-navigation">
+            <a href="{{ url_for('index') }}" class="logo m-0 float-start">Property</a>
+
+            <ul
+              class="js-clone-nav d-none d-lg-inline-block text-start site-menu float-end"
+            >
+              <li><a href="{{ url_for('index') }}">Home</a></li>
+              <li><a href="{{ url_for('property_list') }}">Properties</a></li>
+              <li><a href="{{ url_for('about') }}">About</a></li>
+              <li><a href="{{ url_for('property_agents') }}">Agents</a></li>
+              <li class="has-children">
+                <a href="#">{{ current_user.username }}</a>
+                <ul class="dropdown">
+                  <li class="active"><a href="{{ url_for('user_dashboard') }}">My Dashboard</a></li>
+                  <li><a href="{{ url_for('user_profile') }}">My Profile</a></li>
+                  <li><a href="{{ url_for('user_properties') }}">My Properties</a></li>
+                  <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                </ul>
+              </li>
+            </ul>
+
+            <a
+              href="#"
+              class="burger light me-auto float-end mt-1 site-menu-toggle js-menu-toggle d-inline-block d-lg-none"
+              data-toggle="collapse"
+              data-target="#main-navbar"
+            >
+              <span></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div
+      class="hero"
+      style="background-image: url('/images/hero_bg_1.jpg')"
+    >
+      <div class="container">
+        <div class="row justify-content-center align-items-center">
+          <div class="col-lg-9 text-center mt-5">
+            <h1 class="heading" data-aos="fade-up">My Profile</h1>
+
+            <nav
+              aria-label="breadcrumb"
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
+              <ol class="breadcrumb text-center justify-content-center">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('user_dashboard') }}">Dashboard</a></li>
+                <li
+                  class="breadcrumb-item active text-white-50"
+                  aria-current="page"
+                >
+                  Profile
+                </li>
+              </ol>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <div class="p-5 bg-white">
+              <h3 class="mb-4">Update Profile Information</h3>
+              
+              {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                  {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                      {{ message }}
+                      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+              {% endwith %}
+
+              <form method="POST" action="">
+                {{ form.hidden_tag() }}
+                
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    {{ form.username.label(class="form-label") }}
+                    {{ form.username(class="form-control") }}
+                    {% if form.username.errors %}
+                      <div class="text-danger">
+                        {% for error in form.username.errors %}
+                          <small>{{ error }}</small>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  </div>
+                  
+                  <div class="col-md-6 mb-3">
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-control") }}
+                    {% if form.email.errors %}
+                      <div class="text-danger">
+                        {% for error in form.email.errors %}
+                          <small>{{ error }}</small>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    {{ form.first_name.label(class="form-label") }}
+                    {{ form.first_name(class="form-control") }}
+                    {% if form.first_name.errors %}
+                      <div class="text-danger">
+                        {% for error in form.first_name.errors %}
+                          <small>{{ error }}</small>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  </div>
+                  
+                  <div class="col-md-6 mb-3">
+                    {{ form.last_name.label(class="form-label") }}
+                    {{ form.last_name(class="form-control") }}
+                    {% if form.last_name.errors %}
+                      <div class="text-danger">
+                        {% for error in form.last_name.errors %}
+                          <small>{{ error }}</small>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    {{ form.phone.label(class="form-label") }}
+                    {{ form.phone(class="form-control") }}
+                    {% if form.phone.errors %}
+                      <div class="text-danger">
+                        {% for error in form.phone.errors %}
+                          <small>{{ error }}</small>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  </div>
+                  
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Current Role</label>
+                    <input type="text" class="form-control" value="{{ current_user.role }}" readonly>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    {{ form.password.label(class="form-label") }}
+                    {{ form.password(class="form-control", placeholder="Leave blank to keep current password") }}
+                    {% if form.password.errors %}
+                      <div class="text-danger">
+                        {% for error in form.password.errors %}
+                          <small>{{ error }}</small>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  </div>
+                  
+                  <div class="col-md-6 mb-3">
+                    {{ form.confirm_password.label(class="form-label") }}
+                    {{ form.confirm_password(class="form-control", placeholder="Confirm new password") }}
+                    {% if form.confirm_password.errors %}
+                      <div class="text-danger">
+                        {% for error in form.confirm_password.errors %}
+                          <small>{{ error }}</small>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="d-grid">
+                      <a href="{{ url_for('user_dashboard') }}" class="btn btn-outline-primary">Cancel</a>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="d-grid">
+                      {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="text-center">
+              <p class="mb-0">
+                Copyright &copy;
+                <script>
+                  document.write(new Date().getFullYear());
+                </script>
+                All rights reserved | Property
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <div id="overlayer"></div>
+    <div class="loader">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/tiny-slider.js"></script>
+    <script src="/js/aos.js"></script>
+    <script src="/js/navbar.js"></script>
+    <script src="/js/counter.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
